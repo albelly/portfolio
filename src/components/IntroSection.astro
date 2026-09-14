@@ -1,0 +1,112 @@
+---
+/**
+ * 全ページ冒頭に置く「どんな制作ができる人か」の自己紹介エリア。
+ * 文言は src/config/site.ts の profile を編集すれば全ページに反映される。
+ * ページ固有の見出し・説明を出したい場合は props で上書きする。
+ */
+import { profile } from '../config/site';
+
+interface Props {
+  /** ページ固有の見出し。省略時はプロフィールの肩書きを使う */
+  heading?: string;
+  /** ページ固有のリード文。省略時はプロフィールの紹介文を使う */
+  lead?: string;
+  /** 「できること」の3項目を出すかどうか（カテゴリページでは省略することが多い） */
+  showSkills?: boolean;
+}
+
+const { heading, lead, showSkills = true } = Astro.props;
+---
+
+<section class="intro">
+  <div class="container intro__inner">
+    <p class="intro__name">{profile.name}<span class="intro__role">{profile.role}</span></p>
+
+    <h1 class="intro__heading">{heading ?? profile.tagline}</h1>
+
+    <div class="intro__body">
+      {
+        lead
+          ? <p>{lead}</p>
+          : profile.intro.map((paragraph) => <p>{paragraph}</p>)
+      }
+    </div>
+
+    {
+      showSkills && (
+        <ul class="intro__skills">
+          {profile.skills.map((skill) => (
+            <li class="intro__skill">
+              <h2 class="intro__skill-title">{skill.title}</h2>
+              <p class="intro__skill-body">{skill.body}</p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .intro {
+    background: var(--hero-bg);
+    border-bottom: 1px solid var(--color-border);
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .intro__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .intro__role {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  .intro__heading {
+    max-width: 30em;
+  }
+
+  .intro__body {
+    margin-top: 1.1rem;
+    max-width: 42rem;
+    color: var(--color-text-muted);
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .intro__skills {
+    display: grid;
+    gap: 1rem;
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    /* 画面幅に応じて 1〜3 列へ自動で切り替わる */
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+
+  .intro__skill {
+    padding: 1.1rem 1.2rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .intro__skill-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .intro__skill-body {
+    font-size: 0.85rem;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+  }
+</style>

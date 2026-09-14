@@ -1,0 +1,118 @@
+---
+/**
+ * カテゴリタブ。
+ * 最上部のヘッダーバーと、スクロール時に開くメニューパネルの
+ * 両方から同じコンポーネントを使い回している（variant で見た目だけ変える）。
+ */
+import { navItems, type NavId } from '../config/site';
+
+interface Props {
+  /** 現在のページ。タブのハイライトに使う */
+  current?: NavId;
+  /** 'bar' = 最上部の横並び / 'menu' = 右上メニュー内の縦並び */
+  variant?: 'bar' | 'menu';
+}
+
+const { current = 'top', variant = 'bar' } = Astro.props;
+---
+
+<nav class={`tabs tabs--${variant}`} aria-label="カテゴリ">
+  <ul class="tabs__list">
+    {
+      navItems.map((item) => (
+        <li class="tabs__item">
+          <a
+            class="tabs__link"
+            href={item.href}
+            aria-current={current === item.id ? 'page' : undefined}
+          >
+            <span class="tabs__label">{item.label}</span>
+            <span class="tabs__sub">{item.sub}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .tabs__list {
+    display: flex;
+    margin: 0;
+  }
+
+  .tabs__link {
+    display: block;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    transition:
+      color var(--transition),
+      background-color var(--transition),
+      border-color var(--transition);
+  }
+
+  .tabs__label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  .tabs__sub {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    line-height: 1.4;
+    opacity: 0.65;
+    white-space: nowrap;
+  }
+
+  /* ---------------- 最上部のバー ---------------- */
+  .tabs--bar .tabs__list {
+    gap: clamp(0.25rem, 2vw, 1.25rem);
+    /* スマホでは横スクロールで全タブに触れるようにする */
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs--bar .tabs__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs--bar .tabs__link {
+    padding: 0.55rem 0.7rem 0.5rem;
+    border-bottom: 2px solid transparent;
+  }
+
+  .tabs--bar .tabs__link:hover {
+    color: var(--color-text);
+  }
+
+  .tabs--bar .tabs__link[aria-current='page'] {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  /* ---------------- メニュー内の縦並び ---------------- */
+  .tabs--menu .tabs__list {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .tabs--menu .tabs__link {
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .tabs--menu .tabs__link:hover {
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+
+  .tabs--menu .tabs__link[aria-current='page'] {
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+</style>

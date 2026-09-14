@@ -1,0 +1,72 @@
+---
+import { profile, navItems } from '../config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div>
+      <p class="site-footer__name">{profile.name}</p>
+      <p class="site-footer__role">{profile.role}</p>
+    </div>
+
+    <nav aria-label="フッター">
+      <ul class="site-footer__nav">
+        {navItems.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <p class="site-footer__copy">&copy; {year} {profile.name}</p>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding-block: 2.5rem 1.5rem;
+    margin-top: var(--section-gap);
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .site-footer__name {
+    font-weight: 700;
+  }
+
+  .site-footer__role {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+
+  .site-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .site-footer__nav a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .site-footer__nav a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-footer__copy {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+  }
+</style>

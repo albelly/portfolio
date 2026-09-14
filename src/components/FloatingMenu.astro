@@ -1,0 +1,183 @@
+---
+/**
+ * スクロールで最上部のタブが画面外に出たときに、右上へ表示されるメニュー。
+ *
+ * 【仕組み】
+ *  BaseLayout がヘッダー直後に置いた #header-sentinel（高さ0の目印）を
+ *  IntersectionObserver で監視する。これが画面外に出た ＝ タブが見えなくなった、
+ *  と判定してメニューボタンを表示する。
+ *  scroll イベントを毎回拾うより負荷が軽く、実装も短い。
+ */
+import CategoryTabs from './CategoryTabs.astro';
+import type { NavId } from '../config/site';
+
+interface Props {
+  current?: NavId;
+}
+
+const { current = 'top' } = Astro.props;
+---
+
+<div class="floating-menu" id="floating-menu">
+  <button
+    class="floating-menu__button"
+    id="menu-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="menu-panel"
+  >
+    <span class="floating-menu__icon" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </span>
+    <span class="visually-hidden">メニューを開く</span>
+  </button>
+
+  <div class="floating-menu__panel" id="menu-panel" hidden>
+    <CategoryTabs current={current} variant="menu" />
+  </div>
+</div>
+
+<style>
+  .floating-menu {
+    position: fixed;
+    top: 1rem;
+    right: var(--gutter);
+    z-index: 50;
+
+    /* 既定は非表示。スクロールで .is-visible が付くと現れる */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.5rem);
+    transition:
+      opacity var(--transition),
+      transform var(--transition),
+      visibility var(--transition);
+  }
+
+  .floating-menu.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .floating-menu__button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition:
+      border-color var(--transition),
+      background-color var(--transition);
+  }
+
+  .floating-menu__button:hover {
+    border-color: var(--color-accent);
+  }
+
+  /* ハンバーガーアイコン */
+  .floating-menu__icon {
+    display: grid;
+    gap: 4px;
+    width: 1.1rem;
+  }
+
+  .floating-menu__icon span {
+    display: block;
+    height: 1.5px;
+    background: var(--color-text);
+    border-radius: 1px;
+    transition:
+      transform var(--transition),
+      opacity var(--transition);
+  }
+
+  /* 開いている間は × に変形 */
+  .floating-menu.is-open .floating-menu__icon span:nth-child(1) {
+    transform: translateY(5.5px) rotate(45deg);
+  }
+
+  .floating-menu.is-open .floating-menu__icon span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .floating-menu.is-open .floating-menu__icon span:nth-child(3) {
+    transform: translateY(-5.5px) rotate(-45deg);
+  }
+
+  /* ---------------- 開くパネル ---------------- */
+  .floating-menu__panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 13rem;
+    padding: 0.4rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* hidden 属性が付いているときは確実に隠す */
+  .floating-menu__panel[hidden] {
+    display: none;
+  }
+
+  /* JavaScript が無効な環境では、そもそもボタンを出さない
+     （最上部のタブだけで全ページに移動できるため支障はない） */
+  :global(html.no-js) .floating-menu {
+    display: none;
+  }
+</style>
+
+<script>
+  const menu = document.getElementById('floating-menu');
+  const toggle = document.getElementById('menu-toggle');
+  const panel = document.getElementById('menu-panel');
+  const sentinel = document.getElementById('header-sentinel');
+
+  if (menu && toggle && panel && sentinel) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+      menu.classList.toggle('is-open', open);
+    };
+
+    // ヘッダー直後の目印が画面外に出たら＝タブが見えなくなったら表示
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const scrolledPast = !entry.isIntersecting;
+        menu.classList.toggle('is-visible', scrolledPast);
+        // 上に戻ったときは開いたままにしない
+        if (!scrolledPast) setOpen(false);
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(sentinel);
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Escape キーで閉じる
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+
+    // メニューの外側をクリックしたら閉じる
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target as Node)) setOpen(false);
+    });
+
+    // リンクを押したら閉じる
+    panel.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    });
+  }
+</script>

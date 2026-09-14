@@ -1,0 +1,48 @@
+---
+/**
+ * ① Web・LP制作
+ * 作品は別サイトとして作り、iframe または URL リンクで見せる想定。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IntroSection from '../components/IntroSection.astro';
+import WorkGrid from '../components/WorkGrid.astro';
+import { getCategory, worksByCategory } from '../config/site';
+
+const category = getCategory('web');
+const items = worksByCategory('web');
+---
+
+<BaseLayout
+  title={category.heading}
+  description={category.description}
+  theme="web"
+  current="web"
+>
+  <IntroSection heading={category.heading} lead={category.description} showSkills={false} />
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Works</span>
+        <h2>制作実績</h2>
+        <p class="section-head__lead">
+          各作品は実際のサイトをそのまま表示しています。
+        </p>
+      </div>
+
+      <WorkGrid works={items} layout="grid" />
+    </div>
+  </section>
+
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Detail</span>
+        <h2>制作の進め方</h2>
+      </div>
+      <div class="placeholder">
+        ヒアリング〜公開までの流れ、料金の目安などはこの後の工程で追加します。
+      </div>
+    </div>
+  </section>
+</BaseLayout>

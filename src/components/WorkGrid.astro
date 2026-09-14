@@ -1,0 +1,206 @@
+---
+/**
+ * 作品一覧。
+ *
+ * 【出し分け】
+ *  作品データの embedType に応じて表示形式が変わる。
+ *   - 'iframe' : 別サイトとして作った作品を画面内に埋め込む（Web・LP向け）
+ *   - 'link'   : サムネイル＋別タブで開くリンク
+ *   - 'image'  : 画像を直接表示（画像生成向け）
+ *  URL や画像が未設定のものは「準備中」のプレースホルダーになるので、
+ *  Phase 3 では site.ts にデータを足していくだけでよい。
+ *
+ * 【レイアウト】
+ *   - 'grid'  : カードを並べる（TOPの抜粋・Web・アプリ向け）
+ *   - 'stack' : 1件ずつ大きく縦に並べる（画像生成ページ向け）
+ */
+import type { Work } from '../config/site';
+
+interface Props {
+  works: Work[];
+  layout?: 'grid' | 'stack';
+  /** iframe を実際に埋め込むか。false ならサムネイル扱い（一覧では重くなるため既定は false） */
+  enableIframe?: boolean;
+}
+
+const { works, layout = 'grid', enableIframe = false } = Astro.props;
+---
+
+<ul class={`works works--${layout}`}>
+  {
+    works.map((work) => (
+      <li class="work">
+        <article class="work__card">
+          <div class="work__media">
+            {work.embedType === 'iframe' && work.url && enableIframe ? (
+              <iframe
+                class="work__iframe"
+                src={work.url}
+                title={work.title}
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                referrerpolicy="no-referrer"
+              />
+            ) : work.image ? (
+              <img src={work.image} alt={work.title} loading="lazy" decoding="async" />
+            ) : (
+              <div class="placeholder">準備中</div>
+            )}
+          </div>
+
+          <div class="work__body">
+            <div class="work__meta">
+              {work.year && <span class="work__year">{work.year}</span>}
+              {work.tags.map((tag) => (
+                <span class="work__tag">{tag}</span>
+              ))}
+            </div>
+
+            <h3 class="work__title">{work.title}</h3>
+            <p class="work__summary">{work.summary}</p>
+
+            {layout === 'stack' && work.description && (
+              <p class="work__description">{work.description}</p>
+            )}
+
+            {work.url && (
+              <p class="work__link">
+                <a href={work.url} target="_blank" rel="noopener noreferrer">
+                  サイトを開く
+                  <span aria-hidden="true">&nbsp;&rarr;</span>
+                </a>
+              </p>
+            )}
+          </div>
+        </article>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .works {
+    display: grid;
+    margin: 0;
+  }
+
+  /* ---------------- カードを並べる ---------------- */
+  .works--grid {
+    gap: clamp(1rem, 2.5vw, 1.75rem);
+    /* 画面幅に応じて列数が自動で変わる */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+
+  /* ---------------- 1件ずつ大きく縦に ---------------- */
+  .works--stack {
+    gap: clamp(2rem, 5vw, 3.5rem);
+    grid-template-columns: 1fr;
+  }
+
+  .works--stack .work__card {
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+
+  .work__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color var(--transition),
+      box-shadow var(--transition);
+  }
+
+  .work__card:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+  }
+
+  .work__media {
+    background: var(--color-surface-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .works--grid .work__media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .work__media :global(.placeholder) {
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .work__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .works--stack .work__media img {
+    height: auto;
+    object-fit: contain;
+  }
+
+  .work__iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .work__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.1rem 1.2rem 1.3rem;
+  }
+
+  .work__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    line-height: 1.6;
+  }
+
+  .work__year {
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .work__tag {
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .work__title {
+    font-size: 1rem;
+  }
+
+  .work__summary,
+  .work__description {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .work__link {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .work__link a {
+    text-decoration: none;
+  }
+</style>

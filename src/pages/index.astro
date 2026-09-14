@@ -1,0 +1,136 @@
+---
+/**
+ * TOPページ。
+ * クライアントに見られる前提のため、演出は控えめ・情報を素直に並べる構成にしている。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IntroSection from '../components/IntroSection.astro';
+import WorkGrid from '../components/WorkGrid.astro';
+import { categories, featuredWorks } from '../config/site';
+
+const picks = featuredWorks(3);
+---
+
+<BaseLayout title="TOP" theme="base" current="top">
+  <!-- 自己紹介エリア -->
+  <IntroSection />
+
+  <!-- カテゴリ案内 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Categories</span>
+        <h2>制作カテゴリ</h2>
+        <p class="section-head__lead">
+          ご依頼の内容に近いカテゴリから、制作実績をご覧いただけます。
+        </p>
+      </div>
+
+      <ul class="category-cards">
+        {
+          categories.map((category) => (
+            <li>
+              <a class="category-card" href={category.href}>
+                <span class="category-card__sub">{category.sub}</span>
+                <span class="category-card__title">{category.label}</span>
+                <span class="category-card__body">{category.description}</span>
+                <span class="category-card__more" aria-hidden="true">詳しく見る &rarr;</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- 作品の簡易一覧 -->
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Works</span>
+        <h2>制作実績</h2>
+        <p class="section-head__lead">
+          各カテゴリから代表的なものを抜粋しています。
+        </p>
+      </div>
+
+      <WorkGrid works={picks} layout="grid" />
+    </div>
+  </section>
+
+  <!-- お問い合わせ（Phase 4 で実装） -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Contact</span>
+        <h2>お問い合わせ</h2>
+      </div>
+      <div class="placeholder">
+        お問い合わせフォーム／連絡先はこの後の工程で追加します。
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .category-cards {
+    display: grid;
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    margin: 0;
+  }
+
+  .category-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.5rem 1.4rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: var(--color-text);
+    transition:
+      border-color var(--transition),
+      box-shadow var(--transition),
+      transform var(--transition);
+  }
+
+  .category-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    color: var(--color-text);
+  }
+
+  .category-card__sub {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .category-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .category-card__body {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--color-text-muted);
+  }
+
+  .category-card__more {
+    margin-top: auto;
+    padding-top: 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+</style>
