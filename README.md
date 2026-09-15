@@ -23,16 +23,26 @@ npm run preview  # ビルド結果を確認
 | `src/components/WorkGrid.astro` | 作品一覧。iframe / リンク / 画像を出し分ける |
 | `src/styles/themes.css` | **テーマ（配色）の定義**。カテゴリごとの雰囲気はここで調整 |
 | `src/styles/global.css` | リセットと共通スタイル |
-| `src/pages/` | TOP と3カテゴリのページ |
+| `src/pages/index.astro` | TOPページ |
+| `src/pages/[category].astro` | カテゴリページ。公開中のカテゴリの数だけ自動生成される |
 
 ## ページ
 
-| URL | 内容 | テーマ |
-| --- | --- | --- |
-| `/` | TOP | `base` |
-| `/web/` | Web・LP制作 | `web` |
-| `/apps/` | Webアプリ | `apps` |
-| `/images/` | 画像生成 | `images` |
+| URL | 内容 | テーマ | 公開 |
+| --- | --- | --- | --- |
+| `/` | TOP | `base` | 公開 |
+| `/web/` | Web・LP制作 | `web` | 公開 |
+| `/apps/` | Webアプリ | `apps` | 非公開 |
+| `/images/` | ロゴ・アイコン制作 | `images` | 非公開 |
+
+3サービス（クラウドワークス・ランサーズ・ココナラ）の公開プロフィールでは
+Webデザインに軸を絞っているため、このサイトも Web・LP制作のみを公開している。
+
+## カテゴリの追加・復活
+
+`src/config/site.ts` の `categories` で `enabled: true` にするか、配列に1つ追記する。
+それだけでタブ・メニュー・ページ（`/<id>/`）・TOPのカテゴリ欄・作品一覧がすべて追随する。
+新しい配色を使う場合のみ `src/styles/themes.css` に `[data-theme="<theme>"]` を足す。
 
 ## 作品の追加方法
 

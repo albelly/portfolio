@@ -19,13 +19,13 @@ import '../styles/global.css';
 import CategoryTabs from '../components/CategoryTabs.astro';
 import FloatingMenu from '../components/FloatingMenu.astro';
 import Footer from '../components/Footer.astro';
-import { profile, site, type NavId } from '../config/site';
+import { profile, site, type NavId, type ThemeName } from '../config/site';
 
 interface Props {
   title: string;
   description?: string;
   /** themes.css で定義したテーマ名。既定はTOP向けの配色 */
-  theme?: 'base' | 'web' | 'apps' | 'images';
+  theme?: ThemeName;
   /** 現在のページ。タブのハイライトに使う */
   current?: NavId;
 }

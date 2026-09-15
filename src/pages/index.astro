@@ -6,7 +6,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import IntroSection from '../components/IntroSection.astro';
 import WorkGrid from '../components/WorkGrid.astro';
-import { categories, featuredWorks, profile } from '../config/site';
+import { activeCategories, categoryHref, featuredWorks, profile } from '../config/site';
 
 const picks = featuredWorks(3);
 ---
@@ -15,33 +15,37 @@ const picks = featuredWorks(3);
   <!-- 自己紹介エリア -->
   <IntroSection variant="full" />
 
-  <!-- カテゴリ案内 -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Categories</span>
-        <h2>制作カテゴリ</h2>
-        <p class="section-head__lead">
-          ご依頼の内容に近いカテゴリから、制作したものをご覧いただけます。
-        </p>
-      </div>
+  <!-- カテゴリ案内。カテゴリが2つ以上あるときだけ出す -->
+  {
+    activeCategories.length > 1 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="section-head__label">Categories</span>
+            <h2>制作カテゴリ</h2>
+            <p class="section-head__lead">
+              ご依頼の内容に近いカテゴリから、制作したものをご覧いただけます。
+            </p>
+          </div>
 
-      <ul class="category-cards">
-        {
-          categories.map((category) => (
-            <li>
-              <a class="category-card" href={category.href}>
-                <span class="category-card__sub">{category.sub}</span>
-                <span class="category-card__title">{category.label}</span>
-                <span class="category-card__body">{category.description}</span>
-                <span class="category-card__more" aria-hidden="true">詳しく見る &rarr;</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
+          <ul class="category-cards">
+            {activeCategories.map((category) => (
+              <li>
+                <a class="category-card" href={categoryHref(category.id)}>
+                  <span class="category-card__sub">{category.sub}</span>
+                  <span class="category-card__title">{category.label}</span>
+                  <span class="category-card__body">{category.description}</span>
+                  <span class="category-card__more" aria-hidden="true">
+                    詳しく見る &rarr;
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 
   <!-- 作品の簡易一覧 -->
   <section class="section section--surface">
@@ -53,6 +57,16 @@ const picks = featuredWorks(3);
       </div>
 
       <WorkGrid works={picks} layout="grid" />
+
+      {
+        activeCategories.length > 0 && (
+          <p class="works-more">
+            <a class="button button--ghost" href={categoryHref(activeCategories[0].id)}>
+              制作したものをすべて見る
+            </a>
+          </p>
+        )
+      }
     </div>
   </section>
 
@@ -180,6 +194,11 @@ const picks = featuredWorks(3);
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--color-accent);
+  }
+
+  .works-more {
+    margin-top: clamp(1.5rem, 3vw, 2rem);
+    text-align: center;
   }
 
   /* ---------------- 制作にあたって ---------------- */

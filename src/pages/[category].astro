@@ -1,0 +1,59 @@
+---
+/**
+ * カテゴリページ（/web/ など）。
+ *
+ * site.ts の categories のうち enabled が true のものだけ、
+ * ここから自動でページが生成される。
+ * カテゴリを増やすときに、このファイルを触る必要はない。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IntroSection from '../components/IntroSection.astro';
+import WorkGrid from '../components/WorkGrid.astro';
+import { activeCategories, worksByCategory, type Category } from '../config/site';
+
+export function getStaticPaths() {
+  return activeCategories.map((category) => ({
+    params: { category: category.id },
+    props: { category },
+  }));
+}
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+const items = worksByCategory(category.id);
+---
+
+<BaseLayout
+  title={category.heading}
+  description={category.description}
+  theme={category.theme}
+  current={category.id}
+>
+  <IntroSection heading={category.heading} lead={category.description} variant="compact" />
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Works</span>
+        <h2>制作したもの</h2>
+      </div>
+
+      <WorkGrid works={items} layout={category.layout} />
+    </div>
+  </section>
+
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-head__label">Detail</span>
+        <h2>{category.detailHeading}</h2>
+      </div>
+      <div class="placeholder">
+        ご相談から公開までの流れなどは、この後の工程で追加します。
+      </div>
+    </div>
+  </section>
+</BaseLayout>

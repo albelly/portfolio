@@ -16,26 +16,47 @@
 
 /* ------------------------------------------------------------------
  * カテゴリ
+ *
+ * 【カテゴリを増やす／戻すとき】
+ *  下の categories 配列に1つ追記するか、enabled を true にするだけでよい。
+ *  ページ（/<id>/）・タブ・メニュー・作品一覧は自動で追随する。
+ *  新しい配色を使いたい場合だけ、themes.css に [data-theme="<theme>"] を足す。
+ *
+ * 【今の方針】
+ *  3サービスの公開プロフィールでは「ロゴ・バナー・LINEスタンプ・イラスト」等を
+ *  意図的に受注可能な仕事から外し、Webデザインに軸を絞っている。
+ *  このサイトは各サービスのプロフィールからの導線になるため、同じ軸に合わせて
+ *  Web・LP制作のみを有効にしている。
  * ------------------------------------------------------------------ */
 
-/** カテゴリの識別子。テーマ名（themes.css の data-theme）と対応する。 */
-export type CategoryId = 'web' | 'apps' | 'images';
+/** カテゴリの識別子。URL（/<id>/）にもなる。 */
+export type CategoryId = string;
 
 /** ナビゲーションの識別子。TOP を含む。 */
 export type NavId = 'top' | CategoryId;
 
+/** themes.css で定義済みのテーマ名 */
+export type ThemeName = 'base' | 'web' | 'apps' | 'images';
+
 export interface Category {
+  /** URL に使う識別子。/<id>/ のページが生成される */
   id: CategoryId;
   /** タブに表示する名前 */
   label: string;
   /** タブの下に小さく出る補足（英語表記など） */
   sub: string;
-  /** リンク先 */
-  href: string;
   /** カテゴリページの見出し */
   heading: string;
   /** カテゴリページの説明文 */
   description: string;
+  /** 配色。themes.css の [data-theme] と対応する */
+  theme: ThemeName;
+  /** false にするとタブ・ページ・作品一覧から外れる（データは残る） */
+  enabled: boolean;
+  /** 作品の並べ方。画像中心のカテゴリは 'stack' が読みやすい */
+  layout: 'grid' | 'stack';
+  /** カテゴリページ下部の補足セクションの見出し */
+  detailHeading: string;
 }
 
 export const categories: Category[] = [
@@ -43,33 +64,57 @@ export const categories: Category[] = [
     id: 'web',
     label: 'Web・LP制作',
     sub: 'Websites & Landing Pages',
-    href: '/web/',
     heading: 'Web・LP制作',
     description:
       'Webサイト・LP制作を中心に、見やすく使いやすいWebデザインを意識して制作しています。初めて訪れた方でも迷わず操作でき、伝えたい内容が自然に届くかどうかを基準に組み立てています。',
+    theme: 'web',
+    enabled: true,
+    layout: 'grid',
+    detailHeading: '制作の進め方',
   },
+
+  // --- 以下は現在非公開。enabled を true にすればページごと復活する ---
   {
     id: 'apps',
     label: 'Webアプリ',
     sub: 'Web Applications',
-    href: '/apps/',
     heading: 'Webアプリ',
     description: 'ブラウザ上で動作する小規模なツールを、個人制作として作っています。',
+    theme: 'apps',
+    enabled: false,
+    layout: 'grid',
+    detailHeading: '対応できること',
   },
   {
     id: 'images',
-    label: '画像生成',
-    sub: 'Logo / Icon / Stamps',
-    href: '/images/',
-    heading: '画像生成',
-    description: 'ロゴ、アイコン、LINEスタンプなどのビジュアル制作です。',
+    label: 'ロゴ・アイコン制作',
+    sub: 'Logo & Icon',
+    heading: 'ロゴ・アイコン制作',
+    description: 'ロゴやアイコンなどのビジュアル制作です。',
+    theme: 'images',
+    enabled: false,
+    layout: 'stack',
+    detailHeading: '制作できるもの',
   },
 ];
 
-/** ヘッダータブに並べる項目（TOP + 3カテゴリ） */
+/** 公開中のカテゴリだけを取り出す */
+export const activeCategories: Category[] = categories.filter((c) => c.enabled);
+
+/** カテゴリページのURL */
+export function categoryHref(id: CategoryId): string {
+  return `/${id}/`;
+}
+
+/** ヘッダータブに並べる項目（TOP + 公開中のカテゴリ） */
 export const navItems: { id: NavId; label: string; sub: string; href: string }[] = [
   { id: 'top', label: 'TOP', sub: 'Home', href: '/' },
-  ...categories.map((c) => ({ id: c.id as NavId, label: c.label, sub: c.sub, href: c.href })),
+  ...activeCategories.map((c) => ({
+    id: c.id as NavId,
+    label: c.label,
+    sub: c.sub,
+    href: categoryHref(c.id),
+  })),
 ];
 
 /** id からカテゴリを引く */
@@ -105,9 +150,9 @@ export interface Profile {
 }
 
 export const profile: Profile = {
-  // 表記ゆれ: ココナラ「クオン。」／クラウドワークス・ランサーズ「くおん。」
-  // 本文中は「クオン」で統一しているため、サイト上もこれに合わせている。
-  name: 'クオン',
+  // 表示名はクラウドワークス・ランサーズと同じ「くおん。」に統一。
+  // 本文中の自称は3サービス共通で「クオン」のままにしている。
+  name: 'くおん。',
   role: 'Webデザイナー',
   tagline: '伝えたい魅力を、見やすいWebデザインで形にします',
 
@@ -154,7 +199,6 @@ export const profile: Profile = {
     { label: '返信', value: '原則当日中、遅くとも24時間以内' },
     { label: '勤務場所', value: 'フルリモート' },
     { label: '打ち合わせ', value: 'Slack / Zoom / Discord、各サイトのメッセージに対応' },
-    { label: '時間単価', value: '1,500円 〜 2,000円' },
   ],
 
   profiles: [
@@ -264,6 +308,11 @@ export const works: Work[] = [
   },
 ];
 
+/** 公開中のカテゴリに属する作品だけ（非公開カテゴリの作品は表に出さない） */
+export const activeWorks: Work[] = works.filter((w) =>
+  activeCategories.some((c) => c.id === w.category),
+);
+
 /** 指定カテゴリの作品を取り出す */
 export function worksByCategory(category: CategoryId): Work[] {
   return works.filter((w) => w.category === category);
@@ -271,8 +320,8 @@ export function worksByCategory(category: CategoryId): Work[] {
 
 /** TOPページ用の抜粋（featured を優先し、足りなければ先頭から補う） */
 export function featuredWorks(limit = 3): Work[] {
-  const featured = works.filter((w) => w.featured);
-  const rest = works.filter((w) => !w.featured);
+  const featured = activeWorks.filter((w) => w.featured);
+  const rest = activeWorks.filter((w) => !w.featured);
   return [...featured, ...rest].slice(0, limit);
 }
 
