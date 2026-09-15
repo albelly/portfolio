@@ -44,13 +44,107 @@ Webデザインに軸を絞っているため、このサイトも Web・LP制�
 それだけでタブ・メニュー・ページ（`/<id>/`）・TOPのカテゴリ欄・作品一覧がすべて追随する。
 新しい配色を使う場合のみ `src/styles/themes.css` に `[data-theme="<theme>"]` を足す。
 
-## 作品の追加方法
+## 作品を追加する
 
-`src/config/site.ts` の `works` 配列に追記する。`embedType` で見せ方が決まる。
+作品は `src/config/site.ts` の `works` 配列に追記する。
+**ページ側のファイルは触らない。** 配列に足せば一覧に自動で並ぶ。
 
-- `iframe` … 別サイトとして作った作品を画面内に埋め込む
-- `link` … サムネイル＋別タブで開くリンク
-- `image` … 画像を直接表示（`image` に `public/` 起点のパスを指定）
+### 手順
+
+1. 画像を使う場合は `public/works/` に置く（例: `public/works/cafe-lp.png`）
+2. `works` 配列にオブジェクトを1つ追加する
+3. `npm run dev` で表示を確認する
+
+**配列の並び順がそのまま表示順**になる。新しい作品は先頭に足す。
+
+### 書く項目
+
+| 項目 | 必須 | 内容 |
+| --- | --- | --- |
+| `id` | ✅ | 半角英数の一意な名前。他の作品と重複させない |
+| `title` | ✅ | 作品名 |
+| `category` | ✅ | `'web'` など。**公開中のカテゴリのidと一致させる** |
+| `summary` | ✅ | 一覧カードに出る1〜2文の説明 |
+| `description` | | 詳しい説明。`layout: 'stack'` のカテゴリで本文として出る |
+| `year` | | 制作年 |
+| `tags` | ✅ | 分類の配列 |
+| `embedType` | ✅ | 下表を参照 |
+| `url` | △ | `iframe` / `link` のとき必須。公開URL |
+| `repoUrl` | | ソースコードの公開先。どの型でも使える |
+| `image` | △ | `image` のとき必須。`public/` を起点にしたパス |
+| `featured` | | `true` にするとTOPの抜粋に出る |
+
+### embedType の選び方
+
+| 値 | 使う場面 | 必要なもの |
+| --- | --- | --- |
+| `iframe` | 別サイトとして公開済みで、画面内に埋め込んで見せたいもの | `url` |
+| `link` | 別タブで開かせたいもの（重いサイト・外部サービス） | `url` ＋ `image` 推奨 |
+| `image` | 画像そのものが作品のもの | `image` |
+| `self` | このサイト自身のように、開くべき外部URLが無いもの | 任意で `image` / `repoUrl` |
+
+> `self` がある理由: このサイト自身を `iframe` で埋め込むと、埋め込んだページにも
+> 同じ一覧があるため入れ子が繰り返される。`link` にすると「サイトを開く」が
+> いま見ているページを指してしまう。`self` はそのどちらも描画しない。
+
+### 記入例
+
+公開サイトを別タブで開かせる場合:
+
+```ts
+{
+  id: 'cafe-lp',
+  title: 'カフェのランディングページ',
+  category: 'web',
+  summary: '新規開店するカフェの告知用ページです。',
+  year: '2026',
+  tags: ['LP', 'HTML・CSS', 'レスポンシブ対応'],
+  embedType: 'link',
+  url: 'https://example.com/',
+  image: '/works/cafe-lp.png',
+  featured: true,
+},
+```
+
+画面内に埋め込んで見せる場合:
+
+```ts
+{
+  id: 'shop-site',
+  title: '雑貨店のWebサイト',
+  category: 'web',
+  summary: '店舗紹介と商品一覧をまとめたサイトです。',
+  year: '2026',
+  tags: ['Webサイト', 'HTML・CSS'],
+  embedType: 'iframe',
+  url: 'https://example.com/',
+},
+```
+
+### 文面を書くときの注意
+
+公開プロフィール（クラウドワークス・ランサーズ・ココナラ）と表現を揃える。
+
+- 制作手段としてのAIツール名は書かない
+- 「バグ」ではなく「動作上の問題」
+- 「完成後に確認」ではなく「納品前には実際に操作しながら」
+- 「1サイト制作」などの件数は書かない
+- 実力以上に見える技術名をタグに入れない（JavaScript は HTML・CSS より控えめに扱う）
+
+次のコマンドで、書き出したHTMLに禁止表現が混ざっていないか確認できる。
+
+```bash
+npm run build
+grep -riE "ChatGPT|Claude|Gemini|Codex|Dify|バグ|完成後|UI/UX" dist/
+```
+
+何も出力されなければ問題ない。
+
+### つまずきやすい点
+
+- `id` が他と重複しているとビルドが通らない
+- `category` に**非公開カテゴリのid**を書くと、その作品はどこにも表示されない
+- `image` のパスに `public/` を含めない（`public/works/a.png` → `/works/a.png`）
 
 ## 公開
 

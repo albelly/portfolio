@@ -7,6 +7,7 @@
  *   - 'iframe' : 別サイトとして作った作品を画面内に埋め込む（Web・LP向け）
  *   - 'link'   : サムネイル＋別タブで開くリンク
  *   - 'image'  : 画像を直接表示
+ *   - 'self'   : このサイト自身。iframe もサイトを開くリンクも出さない
  *  URL や画像が未設定のものは「準備中」の表示になるので、
  *  実際の作品ができたら site.ts にデータを足すだけでよい。
  *
@@ -14,7 +15,7 @@
  *   - 'grid'  : 並べる（Web・LP向け）
  *   - 'stack' : 1件ずつ大きく縦に並べる（図版が主役のカテゴリ向け）
  */
-import type { Work } from '../config/site';
+import { profile, type Work } from '../config/site';
 
 interface Props {
   works: Work[];
@@ -43,6 +44,9 @@ const { works, layout = 'grid', enableIframe = false } = Astro.props;
               />
             ) : work.image ? (
               <img src={work.image} alt={work.title} loading="lazy" decoding="async" />
+            ) : work.embedType === 'self' ? (
+              /* 図版が無いあいだは、扉のようにサイト名だけを置く */
+              <p class="work__plate">{profile.name}</p>
             ) : (
               <p class="work__pending">準備中</p>
             )}
@@ -63,10 +67,19 @@ const { works, layout = 'grid', enableIframe = false } = Astro.props;
               ))}
             </p>
 
-            {work.url && (
+            {/* self は今見ているページなので「サイトを開く」は出さない */}
+            {work.embedType !== 'self' && work.url && (
               <p class="work__link">
                 <a class="link" href={work.url} target="_blank" rel="noopener noreferrer">
                   サイトを開く
+                </a>
+              </p>
+            )}
+
+            {work.repoUrl && (
+              <p class="work__link">
+                <a class="link" href={work.repoUrl} target="_blank" rel="noopener noreferrer">
+                  ソースコードを見る
                 </a>
               </p>
             )}
@@ -123,6 +136,15 @@ const { works, layout = 'grid', enableIframe = false } = Astro.props;
     font-size: var(--text-sm);
     color: var(--color-neutral);
     letter-spacing: var(--tracking-label);
+  }
+
+  /* このサイト自身のカード。図版の代わりにサイト名を置く */
+  .work__plate {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
   }
 
   .work__media img {

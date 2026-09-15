@@ -229,8 +229,14 @@ export const profile: Profile = {
  *  - 'iframe' : 別サイトとして作った作品を画面内に埋め込む（Web・LP向け）
  *  - 'link'   : サムネイル＋別タブで開くリンク（重いサイトや外部サービス向け）
  *  - 'image'  : 画像そのものを説明付きで並べる
+ *  - 'self'   : このサイト自身。開くべき外部URLが無い作品にも使う
+ *
+ * 'self' が必要な理由:
+ *   このサイト自身を iframe で埋め込むと、埋め込んだページにも同じ一覧があるため
+ *   入れ子が繰り返される。'link' にすると「サイトを開く」が今見ているページを
+ *   指してしまう。'self' はどちらも描画せず、ソースコードなど別の行き先だけを出す。
  */
-export type EmbedType = 'iframe' | 'link' | 'image';
+export type EmbedType = 'iframe' | 'link' | 'image' | 'self';
 
 export interface Work {
   id: string;
@@ -245,6 +251,8 @@ export interface Work {
   embedType: EmbedType;
   /** embedType が 'iframe' / 'link' のときの公開URL */
   url?: string;
+  /** ソースコードの公開先（任意。どの embedType でも使える） */
+  repoUrl?: string;
   /** サムネイル、または embedType が 'image' のときの画像パス（public/ 起点） */
   image?: string;
   /** TOPページの抜粋一覧に出すかどうか */
@@ -256,6 +264,20 @@ export interface Work {
  * 実際の作品ができ次第ここに追記する。現在はレイアウト確認用。
  */
 export const works: Work[] = [
+  {
+    id: 'portfolio-site',
+    title: 'ポートフォリオサイト（このサイト）',
+    category: 'web',
+    summary:
+      'いまご覧いただいているこのサイトです。構成の検討からデザイン、公開までを一人で担当しました。',
+    description:
+      '見やすさと読みやすさを最優先に設計しました。スマートフォンでも横スクロールが起きないこと、文字と背景のコントラストが十分に取れていること、キーボードだけでも操作できることを、実際に操作しながら一つずつ確認しています。文章量のあるページでも最後まで読めるよう、書体・行間・一行あたりの文字数を調整しました。',
+    year: '2026',
+    tags: ['Webサイト', 'Astro', 'HTML・CSS', 'レスポンシブ対応'],
+    embedType: 'self',
+    repoUrl: 'https://github.com/albelly/portfolio',
+    featured: true,
+  },
   {
     id: 'sample-lp',
     title: 'LP制作（準備中）',
