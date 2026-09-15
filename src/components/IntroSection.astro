@@ -89,6 +89,8 @@ const { heading, lead, variant = 'full' } = Astro.props;
     font-weight: 500;
     line-height: var(--leading-heading);
     color: var(--color-ink);
+    /* 見出しと同じく文節で折り返す。「ない」だけが次行に落ちるのを防ぐ */
+    word-break: auto-phrase;
   }
 
   .intro__voice + .intro__voice {
