@@ -36,24 +36,19 @@ const items = worksByCategory(category.id);
 
   <section class="section">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Works</span>
-        <h2>制作したもの</h2>
-      </div>
+      <h2 class="section__title">制作したもの</h2>
+      <p class="section__lead">
+        現在ポートフォリオを制作中です。準備ができ次第、順次掲載していきます。
+      </p>
 
       <WorkGrid works={items} layout={category.layout} />
     </div>
   </section>
 
-  <section class="section section--surface">
+  <section class="section">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Detail</span>
-        <h2>{category.detailHeading}</h2>
-      </div>
-      <div class="placeholder">
-        ご相談から公開までの流れなどは、この後の工程で追加します。
-      </div>
+      <h2 class="section__title">{category.detailHeading}</h2>
+      <div class="placeholder">ご相談から公開までの流れなどは、この後の工程で追加します。</div>
     </div>
   </section>
 </BaseLayout>

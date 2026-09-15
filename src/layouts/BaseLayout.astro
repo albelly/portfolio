@@ -13,6 +13,7 @@
  *   theme プロパティが <html data-theme="..."> になり、
  *   themes.css の配色が切り替わる。
  */
+import '../styles/tokens.css';
 import '../styles/themes.css';
 import '../styles/global.css';
 
@@ -45,7 +46,16 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- OGP（Phase 4 で画像を追加する） -->
+    <!-- 書体。明朝（見出し）＋ゴシック（本文）の2種のみ読み込む。
+         日本語フォントは Google Fonts 側で必要な文字範囲だけが配信される。 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;600;700&display=swap"
+    />
+
+    <!-- OGP -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -63,7 +73,10 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
 
     <header class="site-header">
       <div class="container site-header__inner">
-        <a class="site-header__brand" href="/">{profile.name}</a>
+        <a class="site-header__brand" href="/">
+          <span class="site-header__name">{profile.name}</span>
+          <span class="site-header__role">{profile.role}</span>
+        </a>
         <CategoryTabs current={current} variant="bar" />
       </div>
     </header>
@@ -83,29 +96,48 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
 
 <style>
   .site-header {
-    background: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
+    background: var(--color-paper);
+    border-bottom: var(--rule-width) solid var(--color-rule);
   }
 
   .site-header__inner {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 1rem;
-    min-height: 3.5rem;
+    gap: var(--space-lg);
+    min-height: 4rem;
+    padding-block: var(--space-sm);
   }
 
   .site-header__brand {
     flex-shrink: 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--color-text);
-    text-decoration: none;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    color: var(--color-ink);
+    white-space: nowrap;
   }
 
   .site-header__brand:hover {
+    color: var(--color-ink);
+  }
+
+  .site-header__brand:hover .site-header__name {
     color: var(--color-accent);
+  }
+
+  .site-header__name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .site-header__role {
+    font-size: var(--text-xs);
+    color: var(--color-neutral);
+    letter-spacing: var(--tracking-label);
   }
 
   /* 判定用の目印。見た目には一切影響しない */
@@ -114,16 +146,15 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
   }
 
   /* 画面が狭いときはブランド名を上、タブを下の2段にする */
-  @media (max-width: 560px) {
+  @media (max-width: 46rem) {
     .site-header__inner {
       flex-direction: column;
       align-items: stretch;
-      gap: 0;
-      padding-top: 0.6rem;
+      gap: var(--space-xs);
     }
 
-    .site-header__brand {
-      padding-bottom: 0.4rem;
+    .site-header__role {
+      display: none;
     }
   }
 </style>

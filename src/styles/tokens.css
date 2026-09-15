@@ -1,0 +1,107 @@
+/* Hallmark · macrostructure: Long Document · tone: editorial · anchor hue: 45 (warm)
+ * theme: custom「墨と朱」· paper oklch(97.5% 0.006 60) · accent oklch(50% 0.17 35) warm
+ * axes: light paper / mincho display / warm accent
+ * display: Shippori Mincho · body: Noto Sans JP · enrichment: none (typography only)
+ * nav: N10 scroll-morph (tabs → floating menu) · footer: Ft1 colophon
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ * contrast: pass (40-41) · mobile: pass (34, 49, 50-57) · honest: pass (46)
+ * chrome: pass (47) · tokens: pass (48) · icons: pass (30)
+ */
+
+/**
+ * デザイントークン。色・文字・余白の値はすべてここに集約する。
+ * 他のCSSやコンポーネントは、この変数を参照するだけで直接値を書かない。
+ *
+ * 配色を変えたいときはこのファイルの :root だけを触ればよい。
+ * カテゴリごとの配色差分は themes.css にある。
+ */
+
+:root {
+  /* ============================================================
+   * 書体
+   * 明朝（見出し）＋ ゴシック（本文）の2種。
+   * 日本語は字面が詰まるため、欧文より行間を広めに取る。
+   * ============================================================ */
+  --font-display:
+    'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+  --font-body:
+    'Noto Sans JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo,
+    sans-serif;
+
+  /* ============================================================
+   * 文字サイズ（1.25 = 長三度の比率）
+   * ============================================================ */
+  --text-2xs: 0.625rem; /* 10px  タブの英字副題（下限） */
+  --text-xs: 0.75rem; /* 12px  ラベル・注記 */
+  --text-sm: 0.8125rem; /* 13px  補足 */
+  --text-base: 1rem; /* 16px  本文 */
+  --text-md: 1.0625rem; /* 17px  ゆったり読ませる本文 */
+  --text-lg: 1.25rem; /* 20px  小見出し */
+  --text-xl: 1.5rem; /* 24px  節見出し */
+  --text-2xl: 1.875rem; /* 30px  章見出し */
+  --text-display: clamp(1.875rem, 1.1rem + 3.1vw, 3.125rem);
+
+  /* 行間。日本語は欧文より広めが読みやすい */
+  --leading-display: 1.45;
+  --leading-heading: 1.55;
+  --leading-body: 1.95;
+  --leading-tight: 1.7;
+
+  /* 字間 */
+  --tracking-display: 0.01em;
+  --tracking-body: 0.02em;
+  --tracking-label: 0.14em;
+
+  /* ============================================================
+   * 余白（4pt スケール）
+   * ============================================================ */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: clamp(3.5rem, 7vw, 6rem);
+
+  /* ============================================================
+   * 寸法
+   * ============================================================ */
+  --measure: 34em; /* 本文1行の長さ。日本語で約40字 */
+  --max-width: 62rem;
+  --gutter: clamp(1.25rem, 5vw, 2.5rem);
+  --radius: 3px; /* 編集的なトーンでは角丸はほぼ付けない */
+  --radius-sm: 2px;
+  --rule-width: 1px;
+
+  /* ============================================================
+   * 動き
+   * ============================================================ */
+  --ease-out: cubic-bezier(0.22, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+
+  /* ============================================================
+   * 配色 ―「墨と朱」
+   *
+   * 紙は純白ではなく生成り。文字は純黒ではなく墨。
+   * 中間色はすべて暖色側に振り、朱の差し色と同じ温度に揃えている。
+   * 朱は画面の3%以下にしか置かない（リンク・罫・現在位置の印）。
+   * ============================================================ */
+  --color-paper: oklch(97.5% 0.006 60); /* 生成りの紙 */
+  --color-paper-2: oklch(95.5% 0.008 58); /* 一段沈めた面 */
+  --color-paper-3: oklch(92.5% 0.01 55); /* 画像の下地 */
+  --color-rule: oklch(87% 0.009 55); /* 罫線 */
+  --color-rule-strong: oklch(60% 0.013 50); /* 強い罫線・ボタンの枠（3:1 以上） */
+  --color-neutral: oklch(51% 0.012 50); /* 弱い文字（4.5:1 以上） */
+  --color-muted: oklch(44% 0.012 46); /* 補足の文字 */
+  --color-ink: oklch(22% 0.012 45); /* 墨（本文） */
+
+  --color-accent: oklch(50% 0.17 35); /* 朱 */
+  --color-accent-hover: oklch(41% 0.15 33);
+  --color-accent-soft: oklch(96% 0.022 40); /* 朱のごく薄い面 */
+  --color-on-accent: oklch(98% 0.005 60);
+  --color-focus: oklch(50% 0.17 35);
+}

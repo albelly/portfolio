@@ -1,96 +1,47 @@
 /**
- * テーマ定義。
+ * カテゴリごとの配色差分。
  *
  * 【仕組み】
  *  <html data-theme="web"> のように属性を付けると、その配色に切り替わる。
  *  各ページは BaseLayout に theme="web" を渡すだけでよい。
  *
- * 【この後の工程で編集する場所】
- *  Phase 2 では、下の [data-theme="..."] ブロック内の色を変えるだけで
- *  カテゴリごとの雰囲気を作り込める。HTML側の変更は不要。
+ * 【基準】
+ *  基本の値は tokens.css にある。ここでは上書きしたい変数だけを書く。
+ *  紙・墨・罫線は全カテゴリで共通にして、差し色（accent）だけを変えている。
+ *  カテゴリごとに紙の色まで変えると、同じ人が作ったサイトに見えなくなるため。
  */
 
-:root {
-  /* --- タイポグラフィ --- */
-  --font-body:
-    'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', Meiryo,
-    sans-serif;
-  --font-heading: var(--font-body);
-
-  /* --- レイアウト --- */
-  --max-width: 1120px;
-  --gutter: clamp(1rem, 4vw, 2rem);
-  --section-gap: clamp(3.5rem, 8vw, 6rem);
-  --radius: 10px;
-  --radius-sm: 6px;
-
-  /* --- 動き（控えめに） --- */
-  --transition: 180ms ease;
-
-  /* ==========================================================
-   * 既定テーマ ＝ TOPページ
-   * クライアントに見られる前提のため、彩度を抑えたビジネス寄りの配色
-   * ========================================================== */
-  --color-bg: #ffffff;
-  --color-surface: #f6f8fa;
-  --color-surface-2: #eef1f5;
-  --color-text: #1a1d21;
-  --color-text-muted: #5b6672;
-  --color-border: #e1e6ec;
-
-  --color-accent: #1f4f8b;
-  --color-accent-hover: #163a68;
-  --color-accent-soft: #eef3fa;
-  --color-on-accent: #ffffff;
-
-  /* ヒーロー（各ページ最上部）の背景 */
-  --hero-bg: linear-gradient(180deg, #f6f8fa 0%, #ffffff 100%);
-
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
-  --shadow-md: 0 4px 16px rgba(16, 24, 40, 0.08);
-}
+/* ==========================================================
+ * TOP（既定）
+ * tokens.css の値をそのまま使う。朱を差し色にした墨色の紙面。
+ * ========================================================== */
 
 /* ==========================================================
  * ① Web・LP制作
+ * 主軸のカテゴリ。TOPと同じ朱で統一し、地続きに見せる。
  * ========================================================== */
 [data-theme='web'] {
-  --color-surface: #f4f9f7;
-  --color-surface-2: #e8f2ee;
-  --color-border: #d9e8e3;
-
-  --color-accent: #0f6f5c;
-  --color-accent-hover: #0b5245;
-  --color-accent-soft: #e6f3ef;
-
-  --hero-bg: linear-gradient(180deg, #eef7f4 0%, #ffffff 100%);
+  /* 上書きなし。TOPと同じ配色 */
 }
 
 /* ==========================================================
- * ② Webアプリ
+ * ② Webアプリ（現在非公開）
+ * 藍。実務的で静かな印象に寄せる。
  * ========================================================== */
 [data-theme='apps'] {
-  --color-surface: #f5f6fc;
-  --color-surface-2: #e9ecf9;
-  --color-border: #dde1f2;
-
-  --color-accent: #3b4cc0;
-  --color-accent-hover: #2c3a97;
-  --color-accent-soft: #edeffb;
-
-  --hero-bg: linear-gradient(180deg, #f0f2fc 0%, #ffffff 100%);
+  --color-accent: oklch(46% 0.13 250);
+  --color-accent-hover: oklch(38% 0.12 250);
+  --color-accent-soft: oklch(96% 0.018 250);
+  --color-focus: oklch(46% 0.13 250);
 }
 
 /* ==========================================================
- * ③ 画像生成
+ * ③ ロゴ・アイコン制作（現在非公開）
+ * 深緑。図版が主役になるため、差し色は控えめにする。
  * ========================================================== */
 [data-theme='images'] {
-  --color-surface: #fdf6f2;
-  --color-surface-2: #f8eae1;
-  --color-border: #f0dfd4;
-
-  --color-accent: #b4552b;
-  --color-accent-hover: #8d4020;
-  --color-accent-soft: #fbeee6;
-
-  --hero-bg: linear-gradient(180deg, #fdf3ed 0%, #ffffff 100%);
+  --color-accent: oklch(45% 0.1 150);
+  --color-accent-hover: oklch(37% 0.09 150);
+  --color-accent-soft: oklch(96% 0.016 150);
+  --color-focus: oklch(45% 0.1 150);
 }

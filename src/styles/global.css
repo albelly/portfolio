@@ -1,6 +1,6 @@
 /**
  * 全ページ共通のベーススタイル。
- * 色・フォント・余白の値は themes.css の CSS変数を参照する。
+ * 色・書体・余白の値は tokens.css の変数を参照する。直接値は書かない。
  */
 
 /* ------------------------------------------------------------------
@@ -19,19 +19,23 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  /* ページ内リンクでヘッダーに隠れないように */
-  scroll-padding-top: 5rem;
+  scroll-padding-top: var(--space-xl);
+  /* 横スクロールは常に起こさない。hidden ではなく clip を使う */
+  overflow-x: clip;
 }
 
 body {
+  overflow-x: clip;
   min-height: 100vh;
   font-family: var(--font-body);
-  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1rem);
-  line-height: 1.85;
-  color: var(--color-text);
-  background: var(--color-bg);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  color: var(--color-ink);
+  background: var(--color-paper);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  font-feature-settings: 'palt' 1; /* 日本語の約物を詰める */
 }
 
 img,
@@ -56,30 +60,32 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
 }
 
 ul,
-ol {
+ol,
+dl,
+dd {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 a {
   color: var(--color-accent);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  transition: color var(--transition);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
 a:hover {
   color: var(--color-accent-hover);
 }
 
-/* キーボード操作時のフォーカス表示（アクセシビリティ） */
+/* キーボード操作時のフォーカス表示。出現はアニメーションさせない */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* 動きを減らす設定をしているユーザーへの配慮 */
@@ -91,34 +97,43 @@ a:hover {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 150ms !important;
   }
 }
 
 /* ------------------------------------------------------------------
- * 見出し・テキスト
+ * 見出し
+ * 明朝で組む。日本語は字面が詰まるため行間を広めに取る。
  * ------------------------------------------------------------------ */
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-heading);
-  line-height: 1.4;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-wrap: balance;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-display);
+  /* 日本語は文節の切れ目で折り返す。
+     「Webデザイ／ン」のような不自然な改行を防ぐ。
+     未対応のブラウザでは通常の折り返しになるだけで、表示は崩れない。 */
+  word-break: auto-phrase;
+  /* 長い英数字が続いてもはみ出させない */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 h1 {
-  font-size: clamp(1.6rem, 1.2rem + 2vw, 2.5rem);
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  font-weight: 600;
 }
 
 h2 {
-  font-size: clamp(1.3rem, 1.1rem + 1vw, 1.75rem);
+  font-size: var(--text-2xl);
 }
 
 h3 {
-  font-size: clamp(1.05rem, 1rem + 0.4vw, 1.2rem);
+  font-size: var(--text-lg);
 }
 
 p {
@@ -137,35 +152,173 @@ p {
   padding-inline: var(--gutter);
 }
 
-/* セクションの縦余白 */
+/* 読ませる文章の幅。1行が長くなりすぎないようにする */
+.measure {
+  max-width: var(--measure);
+}
+
+/* ------------------------------------------------------------------
+ * 節
+ *
+ * 上罫線と見出しだけで区切る。英字ラベル（WORKS / ABOUT 等）は使わない。
+ * 見出しの左に小さな朱の印を置き、差し色の役割をここに限定する。
+ * ------------------------------------------------------------------ */
 .section {
-  padding-block: var(--section-gap);
+  padding-block: var(--space-3xl);
+  border-top: var(--rule-width) solid var(--color-rule);
 }
 
-.section--surface {
-  background: var(--color-surface);
+.section:first-of-type {
+  border-top: 0;
 }
 
-/* セクション見出し */
-.section-head {
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+.section__title {
+  position: relative;
+  font-size: var(--text-xl);
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-lg);
 }
 
-.section-head__label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+/* 見出しの頭に置く朱の小さな印 */
+.section__title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-accent);
+}
+
+.section__lead {
+  max-width: var(--measure);
+  margin-bottom: var(--space-xl);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+/* ------------------------------------------------------------------
+ * 文章ブロック
+ * ------------------------------------------------------------------ */
+.prose {
+  max-width: var(--measure);
+  display: grid;
+  gap: var(--space-lg);
+  font-size: var(--text-md);
+}
+
+.prose p {
+  line-height: var(--leading-body);
+}
+
+/* ------------------------------------------------------------------
+ * 定義リスト（対応可能な業務・稼働について）
+ * カードを並べず、罫線で区切った一覧にする。
+ * ------------------------------------------------------------------ */
+.deflist {
+  max-width: calc(var(--measure) + 8em);
+  border-top: var(--rule-width) solid var(--color-rule);
+}
+
+.deflist__row {
+  display: grid;
+  grid-template-columns: 11rem 1fr;
+  gap: var(--space-2xs) var(--space-lg);
+  padding-block: var(--space-md);
+  border-bottom: var(--rule-width) solid var(--color-rule);
+}
+
+.deflist__term {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+}
+
+.deflist__desc {
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  color: var(--color-muted);
+}
+
+/* 狭い画面では上下2段に積む */
+@media (max-width: 40rem) {
+  .deflist__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * 文字リンク・ボタン
+ * 塗りつぶしの大きなボタンは使わず、罫線と下線で示す。
+ * ------------------------------------------------------------------ */
+.link {
+  display: inline-block;
   color: var(--color-accent);
-  margin-bottom: 0.4rem;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  font-size: var(--text-sm);
+  font-weight: 500;
 }
 
-.section-head__lead {
-  margin-top: 0.6rem;
-  color: var(--color-text-muted);
-  max-width: 42rem;
+.link:hover {
+  color: var(--color-accent-hover);
 }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  border: var(--rule-width) solid var(--color-rule-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.5;
+  /* 2行に折り返すクリック要素を作らない */
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.button:active {
+  border-color: var(--color-accent-hover);
+  color: var(--color-accent-hover);
+  background: var(--color-accent-soft);
+}
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--color-rule);
+  color: var(--color-neutral);
+}
+
+.button:disabled:hover,
+.button[aria-disabled='true']:hover {
+  border-color: var(--color-rule);
+  color: var(--color-neutral);
+}
+
+/* 文字リンクの押下状態 */
+.link:active {
+  color: var(--color-accent-hover);
+}
+
+/* ------------------------------------------------------------------
+ * 補助
+ * ------------------------------------------------------------------ */
 
 /* 読み上げのみに見せる（視覚的に隠す） */
 .visually-hidden {
@@ -182,76 +335,32 @@ p {
 /* 本文へスキップ（キーボード利用者向け） */
 .skip-link {
   position: absolute;
-  left: 0.5rem;
-  top: -3rem;
+  left: var(--space-xs);
+  top: var(--space-xs);
   z-index: 100;
-  padding: 0.5rem 0.9rem;
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  border-radius: var(--radius-sm);
-  transition: top var(--transition);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-radius: var(--radius);
+  /* 位置プロパティではなく transform を動かす（描画負荷を避けるため） */
+  transform: translateY(-5rem);
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
 .skip-link:focus {
-  top: 0.5rem;
-  color: var(--color-on-accent);
+  transform: translateY(0);
+  color: var(--color-paper);
 }
 
-/* ------------------------------------------------------------------
- * ボタン
- * ------------------------------------------------------------------ */
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4em;
-  padding: 0.7em 1.4em;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-weight: 600;
-  line-height: 1.4;
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    background-color var(--transition),
-    border-color var(--transition),
-    color var(--transition);
-}
-
-.button--primary {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.button--primary:hover {
-  background: var(--color-accent-hover);
-  color: var(--color-on-accent);
-}
-
-.button--ghost {
-  background: transparent;
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.button--ghost:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-/* ------------------------------------------------------------------
- * プレースホルダー表示（Phase 3 で中身に差し替わる領域の目印）
- * ------------------------------------------------------------------ */
+/* 中身がまだ無い領域の目印 */
 .placeholder {
   display: grid;
   place-items: center;
-  min-height: 12rem;
-  padding: 2rem 1rem;
-  border: 1px dashed var(--color-border);
+  min-height: 9rem;
+  padding: var(--space-xl) var(--space-md);
+  border: var(--rule-width) dashed var(--color-rule-strong);
   border-radius: var(--radius);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
   text-align: center;
 }

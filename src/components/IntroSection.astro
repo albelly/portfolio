@@ -20,38 +20,36 @@ interface Props {
 const { heading, lead, variant = 'full' } = Astro.props;
 ---
 
-<section class="intro">
+<section class={`intro intro--${variant}`}>
   <div class="container">
-    <p class="intro__name">
-      {profile.name}<span class="intro__role">{profile.role}</span>
-    </p>
-
     <h1 class="intro__heading">{heading ?? profile.tagline}</h1>
 
-    <div class="intro__body">
+    <div class="prose intro__body">
       {lead ? <p>{lead}</p> : profile.intro.map((paragraph) => <p>{paragraph}</p>)}
     </div>
 
     {
       variant === 'full' && (
         <>
+          {/* 依頼者の言葉。本文から一段下げて引用として置く */}
           <div class="intro__voices">
             {profile.voices.map((voice) => (
               <p class="intro__voice">「{voice}」</p>
             ))}
-            <p class="intro__voice-answer">{profile.voicesAnswer}</p>
           </div>
 
+          <p class="prose intro__answer">{profile.voicesAnswer}</p>
+
           <div class="intro__services">
-            <h2 class="intro__services-title">対応可能な業務</h2>
-            <ul class="intro__service-list">
+            <h2 class="section__title">対応できること</h2>
+            <dl class="deflist">
               {profile.services.map((service) => (
-                <li class="intro__service">
-                  <h3 class="intro__service-title">{service.title}</h3>
-                  <p class="intro__service-body">{service.body}</p>
-                </li>
+                <div class="deflist__row">
+                  <dt class="deflist__term">{service.title}</dt>
+                  <dd class="deflist__desc">{service.body}</dd>
+                </div>
               ))}
-            </ul>
+            </dl>
           </div>
         </>
       )
@@ -60,96 +58,49 @@ const { heading, lead, variant = 'full' } = Astro.props;
 </section>
 
 <style>
+  /* 下の余白を上より大きく取り、次の節へ読み進む流れを作る */
   .intro {
-    background: var(--hero-bg);
-    border-bottom: 1px solid var(--color-border);
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+    padding-block: var(--space-2xl) var(--space-3xl);
   }
 
-  .intro__name {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-  }
-
-  .intro__role {
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    color: var(--color-text-muted);
+  .intro--compact {
+    padding-block: var(--space-xl) var(--space-2xl);
   }
 
   .intro__heading {
-    max-width: 26em;
+    max-width: 22em;
   }
 
   .intro__body {
-    margin-top: 1.1rem;
-    max-width: 42rem;
-    color: var(--color-text-muted);
-    display: grid;
-    gap: 0.8rem;
+    margin-top: var(--space-xl);
   }
 
-  /* ---------------- 依頼者の声（セリフ） ---------------- */
+  /* ---------------- 依頼者の言葉 ---------------- */
   .intro__voices {
-    margin-top: clamp(1.75rem, 4vw, 2.25rem);
-    padding-left: 1rem;
-    border-left: 3px solid var(--color-accent);
-    max-width: 42rem;
+    margin-top: var(--space-xl);
+    padding-left: var(--space-lg);
+    border-left: 2px solid var(--color-accent);
+    max-width: var(--measure);
   }
 
   .intro__voice {
-    font-weight: 600;
-    line-height: 1.9;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 500;
+    line-height: var(--leading-heading);
+    color: var(--color-ink);
   }
 
-  .intro__voice-answer {
-    margin-top: 0.7rem;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+  .intro__voice + .intro__voice {
+    margin-top: var(--space-xs);
   }
 
-  /* ---------------- 対応可能な業務 ---------------- */
+  .intro__answer {
+    margin-top: var(--space-lg);
+  }
+
+  /* ---------------- 対応できること ---------------- */
   .intro__services {
-    margin-top: clamp(1.75rem, 4vw, 2.5rem);
-  }
-
-  .intro__services-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--color-accent);
-    margin-bottom: 0.8rem;
-  }
-
-  .intro__service-list {
-    display: grid;
-    gap: 1rem;
-    /* 画面幅に応じて 1〜4 列へ自動で切り替わる */
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  }
-
-  .intro__service {
-    padding: 1.1rem 1.2rem;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .intro__service-title {
-    font-size: 0.95rem;
-    margin-bottom: 0.35rem;
-  }
-
-  .intro__service-body {
-    font-size: 0.85rem;
-    line-height: 1.75;
-    color: var(--color-text-muted);
+    margin-top: var(--space-2xl);
   }
 </style>

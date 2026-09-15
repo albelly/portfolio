@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-15",
+  "framework": "Astro 5",
+  "fonts": "Shippori Mincho + Noto Sans JP (Google Fonts)",
+  "palette": "OKLCH custom properties (src/styles/tokens.css)",
+  "motion": "none (motion-cut project)",
+  "spacing": "4pt scale via --space-* tokens",
+  "designMd": false
+}

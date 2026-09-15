@@ -1,7 +1,9 @@
 ---
 /**
  * TOPページ。
- * クライアントに見られる前提のため、演出は控えめ・情報を素直に並べる構成にしている。
+ *
+ * 書簡のように、上から順に読んでいける構成にしている。
+ * 英字ラベル（WORKS / ABOUT 等）は置かず、日本語の見出しと罫線だけで区切る。
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import IntroSection from '../components/IntroSection.astro';
@@ -12,7 +14,7 @@ const picks = featuredWorks(3);
 ---
 
 <BaseLayout title="TOP" theme="base" current="top">
-  <!-- 自己紹介エリア -->
+  <!-- 自己紹介・対応できること -->
   <IntroSection variant="full" />
 
   <!-- カテゴリ案内。カテゴリが2つ以上あるときだけ出す -->
@@ -20,24 +22,13 @@ const picks = featuredWorks(3);
     activeCategories.length > 1 && (
       <section class="section">
         <div class="container">
-          <div class="section-head">
-            <span class="section-head__label">Categories</span>
-            <h2>制作カテゴリ</h2>
-            <p class="section-head__lead">
-              ご依頼の内容に近いカテゴリから、制作したものをご覧いただけます。
-            </p>
-          </div>
-
-          <ul class="category-cards">
+          <h2 class="section__title">制作の分野</h2>
+          <ul class="categories">
             {activeCategories.map((category) => (
               <li>
-                <a class="category-card" href={categoryHref(category.id)}>
-                  <span class="category-card__sub">{category.sub}</span>
-                  <span class="category-card__title">{category.label}</span>
-                  <span class="category-card__body">{category.description}</span>
-                  <span class="category-card__more" aria-hidden="true">
-                    詳しく見る &rarr;
-                  </span>
+                <a class="categories__link" href={categoryHref(category.id)}>
+                  <span class="categories__name">{category.label}</span>
+                  <span class="categories__body">{category.description}</span>
                 </a>
               </li>
             ))}
@@ -48,21 +39,20 @@ const picks = featuredWorks(3);
   }
 
   <!-- 作品の簡易一覧 -->
-  <section class="section section--surface">
+  <section class="section">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Works</span>
-        <h2>制作したもの</h2>
-        <p class="section-head__lead">各カテゴリから抜粋しています。</p>
-      </div>
+      <h2 class="section__title">制作したもの</h2>
+      <p class="section__lead">
+        現在ポートフォリオを制作中です。準備ができ次第、順次掲載していきます。
+      </p>
 
       <WorkGrid works={picks} layout="grid" />
 
       {
         activeCategories.length > 0 && (
           <p class="works-more">
-            <a class="button button--ghost" href={categoryHref(activeCategories[0].id)}>
-              制作したものをすべて見る
+            <a class="button" href={categoryHref(activeCategories[0].id)}>
+              すべて見る
             </a>
           </p>
         )
@@ -70,34 +60,26 @@ const picks = featuredWorks(3);
     </div>
   </section>
 
-  <!-- 制作について（品質確認・経歴・締め） -->
+  <!-- 制作にあたって -->
   <section class="section">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">About</span>
-        <h2>制作にあたって</h2>
-      </div>
-
-      <div class="about">
+      <h2 class="section__title">制作にあたって</h2>
+      <div class="prose">
         {profile.closing.map((paragraph) => <p>{paragraph}</p>)}
       </div>
     </div>
   </section>
 
-  <!-- 稼働条件 -->
-  <section class="section section--surface">
+  <!-- 稼働について -->
+  <section class="section">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Work Style</span>
-        <h2>稼働について</h2>
-      </div>
-
-      <dl class="work-style">
+      <h2 class="section__title">稼働について</h2>
+      <dl class="deflist">
         {
           profile.workStyle.map((item) => (
-            <div class="work-style__row">
-              <dt class="work-style__label">{item.label}</dt>
-              <dd class="work-style__value">{item.value}</dd>
+            <div class="deflist__row">
+              <dt class="deflist__term">{item.label}</dt>
+              <dd class="deflist__desc">{item.value}</dd>
             </div>
           ))
         }
@@ -108,22 +90,18 @@ const picks = featuredWorks(3);
   <!-- ご依頼窓口 -->
   <section class="section" id="contact">
     <div class="container">
-      <div class="section-head">
-        <span class="section-head__label">Contact</span>
-        <h2>ご依頼・ご相談</h2>
-        <p class="section-head__lead">
-          下記いずれかのサービスからご連絡ください。まだイメージが固まっていない段階でも構いません。
-        </p>
-      </div>
+      <h2 class="section__title">ご依頼・ご相談</h2>
+      <p class="section__lead">
+        下記いずれかのサービスからご連絡ください。まだイメージが固まっていない段階でも構いません。
+      </p>
 
-      <ul class="contact-links">
+      <ul class="contacts">
         {
           profile.profiles.map((item) => (
-            <li>
-              <a class="contact-link" href={item.href} target="_blank" rel="noopener noreferrer">
-                <span class="contact-link__label">{item.label}</span>
-                <span class="contact-link__note">{item.note}</span>
-                <span class="contact-link__arrow" aria-hidden="true">&rarr;</span>
+            <li class="contacts__item">
+              <a class="contacts__link" href={item.href} target="_blank" rel="noopener noreferrer">
+                <span class="contacts__name">{item.label}</span>
+                <span class="contacts__note">{item.note}</span>
               </a>
             </li>
           ))
@@ -134,156 +112,82 @@ const picks = featuredWorks(3);
 </BaseLayout>
 
 <style>
-  /* ---------------- カテゴリカード ---------------- */
-  .category-cards {
+  /* ---------------- 制作の分野 ---------------- */
+  .categories {
+    border-top: var(--rule-width) solid var(--color-rule);
+    max-width: calc(var(--measure) + 8em);
+  }
+
+  .categories__link {
     display: grid;
-    gap: clamp(1rem, 2.5vw, 1.5rem);
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-    margin: 0;
+    gap: var(--space-2xs);
+    padding-block: var(--space-md);
+    border-bottom: var(--rule-width) solid var(--color-rule);
+    color: var(--color-ink);
   }
 
-  .category-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    height: 100%;
-    padding: 1.5rem 1.4rem;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    text-decoration: none;
-    color: var(--color-text);
-    transition:
-      border-color var(--transition),
-      box-shadow var(--transition),
-      transform var(--transition);
+  .categories__link:hover {
+    color: var(--color-ink);
   }
 
-  .category-card:hover {
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-    color: var(--color-text);
-  }
-
-  .category-card__sub {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .categories__link:hover .categories__name {
     color: var(--color-accent);
   }
 
-  .category-card__title {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  .category-card__body {
-    font-size: 0.85rem;
-    line-height: 1.8;
-    color: var(--color-text-muted);
-  }
-
-  .category-card__more {
-    margin-top: auto;
-    padding-top: 0.8rem;
-    font-size: 0.8rem;
+  .categories__name {
+    font-family: var(--font-display);
     font-weight: 600;
-    color: var(--color-accent);
+    font-size: var(--text-base);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .categories__body {
+    font-size: var(--text-sm);
+    line-height: var(--leading-tight);
+    color: var(--color-muted);
   }
 
   .works-more {
-    margin-top: clamp(1.5rem, 3vw, 2rem);
-    text-align: center;
-  }
-
-  /* ---------------- 制作にあたって ---------------- */
-  .about {
-    display: grid;
-    gap: 1rem;
-    max-width: 44rem;
-    color: var(--color-text-muted);
-  }
-
-  /* ---------------- 稼働条件 ---------------- */
-  .work-style {
-    margin: 0;
-    max-width: 44rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .work-style__row {
-    display: grid;
-    grid-template-columns: 9rem 1fr;
-    gap: 0.5rem 1rem;
-    padding-block: 0.85rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .work-style__label {
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .work-style__value {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-  }
-
-  /* 狭い画面では上下2段にする */
-  @media (max-width: 520px) {
-    .work-style__row {
-      grid-template-columns: 1fr;
-      gap: 0.15rem;
-    }
+    margin-top: var(--space-xl);
   }
 
   /* ---------------- ご依頼窓口 ---------------- */
-  .contact-links {
-    display: grid;
-    gap: 0.75rem;
+  .contacts {
+    border-top: var(--rule-width) solid var(--color-rule);
     max-width: 30rem;
-    margin: 0;
   }
 
-  .contact-link {
+  .contacts__item {
+    border-bottom: var(--rule-width) solid var(--color-rule);
+  }
+
+  .contacts__link {
     display: flex;
     align-items: baseline;
-    gap: 0.75rem;
-    padding: 1rem 1.2rem;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    text-decoration: none;
-    color: var(--color-text);
-    transition:
-      border-color var(--transition),
-      box-shadow var(--transition);
+    gap: var(--space-sm);
+    padding-block: var(--space-md);
+    color: var(--color-ink);
+    white-space: nowrap;
   }
 
-  .contact-link:hover {
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-sm);
-    color: var(--color-text);
-  }
-
-  .contact-link__label {
-    font-weight: 700;
-    font-size: 0.95rem;
-  }
-
-  .contact-link__note {
-    font-size: 0.78rem;
-    color: var(--color-text-muted);
-  }
-
-  .contact-link__arrow {
+  .contacts__link::after {
+    content: '→';
     margin-left: auto;
     color: var(--color-accent);
+  }
+
+  .contacts__link:hover {
+    color: var(--color-accent);
+  }
+
+  .contacts__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-base);
+  }
+
+  .contacts__note {
+    font-size: var(--text-xs);
+    color: var(--color-neutral);
   }
 </style>

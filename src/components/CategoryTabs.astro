@@ -38,40 +38,35 @@ const { current = 'top', variant = 'bar' } = Astro.props;
 <style>
   .tabs__list {
     display: flex;
-    margin: 0;
   }
 
   .tabs__link {
     display: block;
-    text-decoration: none;
-    color: var(--color-text-muted);
-    transition:
-      color var(--transition),
-      background-color var(--transition),
-      border-color var(--transition);
+    color: var(--color-muted);
+    /* クリック要素の文字は折り返さない */
+    white-space: nowrap;
+    transition: color var(--dur-fast) var(--ease-out);
   }
 
   .tabs__label {
     display: block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    line-height: 1.4;
-    white-space: nowrap;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    line-height: 1.6;
   }
 
   .tabs__sub {
     display: block;
-    font-size: 0.65rem;
-    letter-spacing: 0.06em;
-    line-height: 1.4;
-    opacity: 0.65;
-    white-space: nowrap;
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-label);
+    line-height: 1.5;
+    color: var(--color-neutral);
   }
 
   /* ---------------- 最上部のバー ---------------- */
   .tabs--bar .tabs__list {
-    gap: clamp(0.25rem, 2vw, 1.25rem);
-    /* スマホでは横スクロールで全タブに触れるようにする */
+    gap: clamp(0.25rem, 2vw, 1.5rem);
+    /* 狭い画面では横スクロールで全タブに触れるようにする */
     overflow-x: auto;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
@@ -82,37 +77,60 @@ const { current = 'top', variant = 'bar' } = Astro.props;
   }
 
   .tabs--bar .tabs__link {
-    padding: 0.55rem 0.7rem 0.5rem;
+    padding: var(--space-2xs) var(--space-xs) var(--space-xs);
     border-bottom: 2px solid transparent;
   }
 
-  .tabs--bar .tabs__link:hover {
-    color: var(--color-text);
+  .tabs--bar .tabs__link:hover,
+  .tabs--bar .tabs__link:active {
+    color: var(--color-ink);
   }
 
+  /* 現在のページ。差し色はここに限定する */
   .tabs--bar .tabs__link[aria-current='page'] {
-    color: var(--color-accent);
+    color: var(--color-ink);
     border-bottom-color: var(--color-accent);
+  }
+
+  .tabs--bar .tabs__link[aria-current='page'] .tabs__sub {
+    color: var(--color-accent);
+  }
+
+  /* 狭い画面では英字の副題を隠す。
+     クリックできる文字が2行になるのを避けるため。 */
+  @media (max-width: 46rem) {
+    .tabs--bar .tabs__sub {
+      display: none;
+    }
+
+    .tabs--bar .tabs__link {
+      padding-block: var(--space-xs);
+    }
   }
 
   /* ---------------- メニュー内の縦並び ---------------- */
   .tabs--menu .tabs__list {
     flex-direction: column;
-    gap: 0.15rem;
   }
 
   .tabs--menu .tabs__link {
-    padding: 0.6rem 0.85rem;
-    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-left: 2px solid transparent;
   }
 
   .tabs--menu .tabs__link:hover {
-    color: var(--color-text);
-    background: var(--color-surface);
+    color: var(--color-ink);
+    background: var(--color-paper-2);
   }
 
   .tabs--menu .tabs__link[aria-current='page'] {
-    color: var(--color-accent);
+    color: var(--color-ink);
+    border-left-color: var(--color-accent);
     background: var(--color-accent-soft);
+  }
+
+  /* メニュー内は縦に余裕があるので副題を残す */
+  .tabs--menu .tabs__sub {
+    font-size: var(--text-2xs);
   }
 </style>
