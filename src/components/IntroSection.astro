@@ -2,46 +2,58 @@
 /**
  * 全ページ冒頭に置く「どんな制作ができる人か」の自己紹介エリア。
  * 文言は src/config/site.ts の profile を編集すれば全ページに反映される。
- * ページ固有の見出し・説明を出したい場合は props で上書きする。
+ *
+ * variant:
+ *   'full'    … TOPページ用。セリフ・対応可能な業務まで出す
+ *   'compact' … カテゴリページ用。見出しと説明のみ
  */
 import { profile } from '../config/site';
 
 interface Props {
-  /** ページ固有の見出し。省略時はプロフィールの肩書きを使う */
+  /** ページ固有の見出し。省略時はキャッチフレーズを使う */
   heading?: string;
-  /** ページ固有のリード文。省略時はプロフィールの紹介文を使う */
+  /** ページ固有のリード文 */
   lead?: string;
-  /** 「できること」の3項目を出すかどうか（カテゴリページでは省略することが多い） */
-  showSkills?: boolean;
+  variant?: 'full' | 'compact';
 }
 
-const { heading, lead, showSkills = true } = Astro.props;
+const { heading, lead, variant = 'full' } = Astro.props;
 ---
 
 <section class="intro">
-  <div class="container intro__inner">
-    <p class="intro__name">{profile.name}<span class="intro__role">{profile.role}</span></p>
+  <div class="container">
+    <p class="intro__name">
+      {profile.name}<span class="intro__role">{profile.role}</span>
+    </p>
 
     <h1 class="intro__heading">{heading ?? profile.tagline}</h1>
 
     <div class="intro__body">
-      {
-        lead
-          ? <p>{lead}</p>
-          : profile.intro.map((paragraph) => <p>{paragraph}</p>)
-      }
+      {lead ? <p>{lead}</p> : profile.intro.map((paragraph) => <p>{paragraph}</p>)}
     </div>
 
     {
-      showSkills && (
-        <ul class="intro__skills">
-          {profile.skills.map((skill) => (
-            <li class="intro__skill">
-              <h2 class="intro__skill-title">{skill.title}</h2>
-              <p class="intro__skill-body">{skill.body}</p>
-            </li>
-          ))}
-        </ul>
+      variant === 'full' && (
+        <>
+          <div class="intro__voices">
+            {profile.voices.map((voice) => (
+              <p class="intro__voice">「{voice}」</p>
+            ))}
+            <p class="intro__voice-answer">{profile.voicesAnswer}</p>
+          </div>
+
+          <div class="intro__services">
+            <h2 class="intro__services-title">対応可能な業務</h2>
+            <ul class="intro__service-list">
+              {profile.services.map((service) => (
+                <li class="intro__service">
+                  <h3 class="intro__service-title">{service.title}</h3>
+                  <p class="intro__service-body">{service.body}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
       )
     }
   </div>
@@ -72,7 +84,7 @@ const { heading, lead, showSkills = true } = Astro.props;
   }
 
   .intro__heading {
-    max-width: 30em;
+    max-width: 26em;
   }
 
   .intro__body {
@@ -83,15 +95,46 @@ const { heading, lead, showSkills = true } = Astro.props;
     gap: 0.8rem;
   }
 
-  .intro__skills {
-    display: grid;
-    gap: 1rem;
-    margin-top: clamp(1.75rem, 4vw, 2.5rem);
-    /* 画面幅に応じて 1〜3 列へ自動で切り替わる */
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  /* ---------------- 依頼者の声（セリフ） ---------------- */
+  .intro__voices {
+    margin-top: clamp(1.75rem, 4vw, 2.25rem);
+    padding-left: 1rem;
+    border-left: 3px solid var(--color-accent);
+    max-width: 42rem;
   }
 
-  .intro__skill {
+  .intro__voice {
+    font-weight: 600;
+    line-height: 1.9;
+  }
+
+  .intro__voice-answer {
+    margin-top: 0.7rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  /* ---------------- 対応可能な業務 ---------------- */
+  .intro__services {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .intro__services-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .intro__service-list {
+    display: grid;
+    gap: 1rem;
+    /* 画面幅に応じて 1〜4 列へ自動で切り替わる */
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+
+  .intro__service {
     padding: 1.1rem 1.2rem;
     background: var(--color-bg);
     border: 1px solid var(--color-border);
@@ -99,12 +142,12 @@ const { heading, lead, showSkills = true } = Astro.props;
     box-shadow: var(--shadow-sm);
   }
 
-  .intro__skill-title {
+  .intro__service-title {
     font-size: 0.95rem;
     margin-bottom: 0.35rem;
   }
 
-  .intro__skill-body {
+  .intro__service-body {
     font-size: 0.85rem;
     line-height: 1.75;
     color: var(--color-text-muted);

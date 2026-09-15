@@ -1,10 +1,17 @@
 /**
  * サイト全体の設定・データを一元管理するファイル。
  *
- * 【この後の工程で編集する場所】
- *  - profile      : 自己紹介文（全ページ冒頭に表示される）
- *  - categories   : カテゴリの名前・説明・テーマ
- *  - works        : 作品データ（ここに追記すれば一覧に自動で並ぶ）
+ * 文面は3サービス（クラウドワークス / ランサーズ / ココナラ）の
+ * 公開プロフィールと整合させている。
+ *
+ * 【ブランド方針の要点】
+ *  - 前に出すもの: Webデザイン / Webサイト・LP制作 / 見やすさ・使いやすさ /
+ *    要望を整理して形にする力 / 納品前の品質確認 / 相談しやすさ
+ *  - 制作手段としてのAIツール名は公開面に出さない
+ *  - 「バグ」→「動作上の問題」、「完成後に確認」→「納品前には実際に操作しながら」
+ *  - 同じ強み（見やすさ・使いやすさ）を文中で二度説明しない
+ *  - セリフ部分には「」を付ける
+ *  - 件数（「1サイト制作」など）は書かない
  */
 
 /* ------------------------------------------------------------------
@@ -38,9 +45,8 @@ export const categories: Category[] = [
     sub: 'Websites & Landing Pages',
     href: '/web/',
     heading: 'Web・LP制作',
-    // TODO: Phase 2 で本文を差し替え
     description:
-      'コーポレートサイト、サービスサイト、キャンペーン用ランディングページの制作を行っています。デザインから実装、公開までを一貫して対応します。',
+      'Webサイト・LP制作を中心に、見やすく使いやすいWebデザインを意識して制作しています。初めて訪れた方でも迷わず操作でき、伝えたい内容が自然に届くかどうかを基準に組み立てています。',
   },
   {
     id: 'apps',
@@ -48,9 +54,7 @@ export const categories: Category[] = [
     sub: 'Web Applications',
     href: '/apps/',
     heading: 'Webアプリ',
-    // TODO: Phase 2 で本文を差し替え
-    description:
-      '業務効率化ツールや予約・管理システムなど、ブラウザ上で動作するアプリケーションを開発しています。小規模から段階的に育てる開発も歓迎です。',
+    description: 'ブラウザ上で動作する小規模なツールを、個人制作として作っています。',
   },
   {
     id: 'images',
@@ -58,9 +62,7 @@ export const categories: Category[] = [
     sub: 'Logo / Icon / Stamps',
     href: '/images/',
     heading: '画像生成',
-    // TODO: Phase 2 で本文を差し替え
-    description:
-      'ロゴ、アイコン、LINEスタンプ、バナーなどのビジュアル制作を行っています。用途に合わせたテイストの調整やバリエーション展開にも対応します。',
+    description: 'ロゴ、アイコン、LINEスタンプなどのビジュアル制作です。',
   },
 ];
 
@@ -83,44 +85,94 @@ export function getCategory(id: CategoryId): Category {
 
 export interface Profile {
   name: string;
-  /** 肩書き */
   role: string;
-  /** 一言キャッチ。meta description の既定値にも使う */
+  /** キャッチフレーズ。クラウドワークス・ランサーズと同一文言 */
   tagline: string;
-  /** 自己紹介の本文（段落ごとに配列で持つ） */
+  /** 自己紹介の導入（段落ごとに配列で持つ） */
   intro: string[];
-  /** 「できること」の箇条書き */
-  skills: { title: string; body: string }[];
-  /** 問い合わせ先（Phase 4 で実際の値に差し替え） */
-  contact: { label: string; href: string }[];
+  /** 依頼者側の悩みを代弁するセリフ。「」付きで表示する */
+  voices: string[];
+  /** セリフを受ける一文 */
+  voicesAnswer: string;
+  /** 【対応可能な業務】 */
+  services: { title: string; body: string }[];
+  /** 品質確認・経歴・締めの段落 */
+  closing: string[];
+  /** 稼働条件 */
+  workStyle: { label: string; value: string }[];
+  /** 各サービスの公開プロフィール（依頼はここから） */
+  profiles: { label: string; href: string; note: string }[];
 }
 
 export const profile: Profile = {
-  // TODO: Phase 2 で実際の情報に差し替え
-  name: 'Your Name',
-  role: 'Web Designer / Developer',
-  tagline: 'Web制作・Webアプリ開発・画像生成を一人で完結できる制作者です。',
+  // 表記ゆれ: ココナラ「クオン。」／クラウドワークス・ランサーズ「くおん。」
+  // 本文中は「クオン」で統一しているため、サイト上もこれに合わせている。
+  name: 'クオン',
+  role: 'Webデザイナー',
+  tagline: '伝えたい魅力を、見やすいWebデザインで形にします',
+
   intro: [
-    'はじめまして。Webサイト制作、Webアプリ開発、ロゴやアイコンなどの画像制作を行っています。',
-    '企画から公開・運用までを一貫して担当できるため、複数の外注先とやり取りする手間をかけずに進められます。小規模な修正から新規立ち上げまで、規模を問わずご相談ください。',
+    'はじめまして、クオンと申します。',
+    'Webサイト・LP制作を中心に、見やすさと使いやすさを意識したWebデザインを心がけています。見た目の印象だけでなく、初めて訪れた方でも迷わず操作でき、伝えたい内容が自然に届くWebサイトづくりを大切にしています。',
   ],
-  skills: [
+
+  voices: [
+    'こんなサイトにしたいけれど、うまく言葉にできない',
+    'イメージはあるけれど、どう形にすればいいか分からない',
+  ],
+  voicesAnswer:
+    'そのような段階からでも、丁寧にお話を伺い、ご要望や目的を一緒に整理しながら制作を進めます。',
+
+  services: [
     {
-      title: 'Web・LP制作',
-      body: 'デザインからコーディング、公開作業まで対応。スマートフォン表示も標準で最適化します。',
+      title: 'Webサイト制作',
+      body: '構成の検討からデザイン、公開までを一貫して対応します。',
     },
     {
-      title: 'Webアプリ開発',
-      body: 'フォーム、予約、管理画面など、業務に合わせた仕組みを構築します。',
+      title: 'LP制作',
+      body: '伝えたい内容が最後まで読まれる流れを意識して組み立てます。',
     },
     {
-      title: '画像生成・デザイン',
-      body: 'ロゴ、アイコン、LINEスタンプ、バナーなど、用途に応じたビジュアルを制作します。',
+      title: 'HTML・CSSコーディング',
+      body: 'デザインをもとに、表示崩れのないページに仕上げます。',
+    },
+    {
+      title: 'Webサイトの修正・更新',
+      body: 'テキストや画像の差し替え、レイアウト調整など、軽微な修正・追加対応が可能です。',
     },
   ],
-  contact: [
-    // TODO: Phase 4 で実際の連絡先に差し替え
-    { label: 'お問い合わせ', href: '#contact' },
+
+  closing: [
+    '納品前には実際に操作しながら、表示崩れや動作上の問題、仕様とのズレがないかを確認し、最後まで丁寧に仕上げます。',
+    'これまで接客、IT関連業務、現場管理など、さまざまな仕事を経験してきました。その経験を活かし、相手に合わせた柔軟な対応と、気軽に相談していただけるコミュニケーションを心がけています。',
+    'お仕事を終えたときに、「頼んでよかった」「話しやすかった」と思っていただけることが一番うれしいです。一つひとつのご依頼に責任を持って丁寧に対応いたします。まずはお気軽にご相談ください。',
+  ],
+
+  workStyle: [
+    { label: '稼働時間', value: '週20時間程度（週4日 × 5時間目安）' },
+    { label: '稼働時間帯', value: '平日夜間、土日・祝日' },
+    { label: '返信', value: '原則当日中、遅くとも24時間以内' },
+    { label: '勤務場所', value: 'フルリモート' },
+    { label: '打ち合わせ', value: 'Slack / Zoom / Discord、各サイトのメッセージに対応' },
+    { label: '時間単価', value: '1,500円 〜 2,000円' },
+  ],
+
+  profiles: [
+    {
+      label: 'クラウドワークス',
+      href: 'https://crowdworks.jp/public/employees/7178099',
+      note: 'くおん。',
+    },
+    {
+      label: 'ランサーズ',
+      href: 'https://www.lancers.jp/profile/qon_nekonari',
+      note: 'くおん。',
+    },
+    {
+      label: 'ココナラ',
+      href: 'https://coconala.com/users/6271776',
+      note: 'クオン。',
+    },
   ],
 };
 
@@ -132,22 +184,19 @@ export const profile: Profile = {
  * 作品の見せ方。
  *  - 'iframe' : 別サイトとして作った作品を画面内に埋め込む（Web・LP向け）
  *  - 'link'   : サムネイル＋別タブで開くリンク（重いサイトや外部サービス向け）
- *  - 'image'  : 画像そのものを説明付きで並べる（画像生成向け）
+ *  - 'image'  : 画像そのものを説明付きで並べる
  */
 export type EmbedType = 'iframe' | 'link' | 'image';
 
 export interface Work {
-  /** URL やキーに使う一意のID */
   id: string;
   title: string;
   category: CategoryId;
   /** 一覧カードに出す短い説明 */
   summary: string;
-  /** 詳細説明（画像生成ページなどで本文として使う） */
+  /** 詳細説明 */
   description?: string;
-  /** 制作年など */
   year?: string;
-  /** 使用技術・タグ */
   tags: string[];
   embedType: EmbedType;
   /** embedType が 'iframe' / 'link' のときの公開URL */
@@ -160,65 +209,58 @@ export interface Work {
 
 /**
  * 作品一覧。
- * Phase 3 でここに実際の作品を追記していく。
- * 現在はレイアウト確認用のプレースホルダー。
+ * 実際の作品ができ次第ここに追記する。現在はレイアウト確認用。
  */
 export const works: Work[] = [
   {
     id: 'sample-lp',
-    title: 'サンプルLP（準備中）',
+    title: 'LP制作（準備中）',
     category: 'web',
-    summary: 'キャンペーン用ランディングページの制作例を掲載予定です。',
+    summary: '個人制作によるランディングページを掲載予定です。',
     year: '2026',
     tags: ['LP', 'レスポンシブ'],
     embedType: 'iframe',
-    // url: 'https://example.com/',
     featured: true,
   },
   {
     id: 'sample-corporate',
-    title: 'サンプルコーポレートサイト（準備中）',
+    title: 'Webサイト制作（準備中）',
     category: 'web',
-    summary: '企業サイトの制作例を掲載予定です。',
+    summary: '個人制作によるWebサイトを掲載予定です。',
     year: '2026',
-    tags: ['コーポレート', 'CMS'],
+    tags: ['Webサイト', 'HTML・CSS'],
     embedType: 'link',
-    // url: 'https://example.com/',
+    featured: true,
   },
   {
     id: 'sample-app',
-    title: 'サンプル管理ツール（準備中）',
+    title: 'Webツール（準備中）',
     category: 'apps',
-    summary: '業務効率化を目的としたWebアプリの制作例を掲載予定です。',
+    summary: 'ブラウザ上で動作する個人制作のツールを掲載予定です。',
     year: '2026',
-    tags: ['管理画面', 'フォーム'],
+    tags: ['個人制作'],
     embedType: 'link',
-    // url: 'https://example.com/',
     featured: true,
   },
   {
     id: 'sample-logo',
-    title: 'サンプルロゴ（準備中）',
+    title: 'ロゴ（準備中）',
     category: 'images',
     summary: 'ロゴ制作の事例を掲載予定です。',
-    description:
-      'ここに制作意図、提案したバリエーション、最終的に採用された案などの説明文が入ります。',
+    description: 'ここに制作意図や提案したバリエーションの説明が入ります。',
     year: '2026',
-    tags: ['ロゴ', 'ブランディング'],
+    tags: ['ロゴ'],
     embedType: 'image',
-    // image: '/works/sample-logo.png',
-    featured: true,
   },
   {
     id: 'sample-stamp',
-    title: 'サンプルLINEスタンプ（準備中）',
+    title: 'LINEスタンプ（準備中）',
     category: 'images',
     summary: 'LINEスタンプの制作事例を掲載予定です。',
-    description: 'ここにテイストの方向性や、表情・ポーズのバリエーションについての説明文が入ります。',
+    description: 'ここにテイストの方向性や表情・ポーズのバリエーションの説明が入ります。',
     year: '2026',
-    tags: ['LINEスタンプ', 'キャラクター'],
+    tags: ['LINEスタンプ'],
     embedType: 'image',
-    // image: '/works/sample-stamp.png',
   },
 ];
 
@@ -239,7 +281,7 @@ export function featuredWorks(limit = 3): Work[] {
  * ------------------------------------------------------------------ */
 
 export const site = {
-  title: `${profile.name} | ポートフォリオ`,
+  title: `${profile.name} | Webサイト・LP制作`,
   shortTitle: profile.name,
-  description: profile.tagline,
+  description: `${profile.tagline}。Webサイト制作・LP制作・HTML/CSSコーディング・Webサイトの修正や更新に対応しています。`,
 };
