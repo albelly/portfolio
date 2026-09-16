@@ -2,13 +2,14 @@
 /**
  * 季節・時間帯の切替ボタン（画面右下・固定）。
  *
- * 既定ではアクセスした時点の季節と時刻に合わせて表示される。
+ * 何も選んでいなければ「季節なし・日中」で表示される。
  * ここから任意の組み合わせに変更でき、選択は localStorage に保存される。
+ * 「いまの時刻に合わせる」は自動モードとして保存され、訪問のたびに時計から決まる。
  *
  * テーマの確定そのものは BaseLayout の head 内スクリプトが行う（ちらつき防止）。
  * このコンポーネントは「切り替える操作」と「いま何のテーマか」の表示を担う。
  */
-import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
+import { seasons, timeBands, themeLabels, STORAGE_KEY, AUTO_VALUE } from '../config/theme';
 ---
 
 <div class="switcher" id="theme-switcher">
@@ -20,14 +21,14 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
     aria-controls="theme-panel"
   >
     <span class="switcher__seal" aria-hidden="true"></span>
-    <span class="switcher__current" id="theme-current-label">秋の日中</span>
+    <span class="switcher__current" id="theme-current-label">季節なし・日中</span>
     <span class="visually-hidden">の配色です。押すと季節と時間帯を選べます</span>
   </button>
 
   <div class="switcher__panel" id="theme-panel" hidden>
     <p class="switcher__lead">
       季節はモチーフ、時間帯は空の色で変わります。<br />
-      いまの時刻に合わせて自動で切り替わります。
+      「いまの時刻に合わせる」で実際の季節と時刻に追従します。
     </p>
 
     <fieldset class="switcher__group">
@@ -155,7 +156,9 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
 
   .switcher__row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* 季節は5つ、時間帯は4つ。列数は中身に合わせる */
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: var(--space-2xs);
   }
 
@@ -234,7 +237,7 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
   }
 </style>
 
-<script define:vars={{ labels: themeLabels, key: STORAGE_KEY }}>
+<script define:vars={{ labels: themeLabels, key: STORAGE_KEY, autoValue: AUTO_VALUE }}>
   const root = document.documentElement;
   const wrap = document.getElementById('theme-switcher');
   const toggle = document.getElementById('theme-toggle');
@@ -261,7 +264,8 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
     const render = () => {
       const s = root.dataset.season;
       const t = root.dataset.time;
-      const name = `${labels.seasons[s] ?? ''}の${labels.times[t] ?? ''}`;
+      const time = labels.times[t] ?? '';
+      const name = s === 'none' ? `季節なし・${time}` : `${labels.seasons[s] ?? ''}の${time}`;
       current.textContent = name;
       if (headerLabel) headerLabel.textContent = name;
       seasonButtons.forEach((b) =>
@@ -306,10 +310,11 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
         const now = fromClock();
         root.dataset.season = now.season;
         root.dataset.time = now.time;
+        // 「自動」として保存する。次回の訪問でも、そのときの時刻に追従する
         try {
-          localStorage.removeItem(key);
+          localStorage.setItem(key, autoValue);
         } catch (e) {
-          /* 何もしない */
+          /* 保存できない環境でも、そのページの間は切り替わる */
         }
         render();
       });

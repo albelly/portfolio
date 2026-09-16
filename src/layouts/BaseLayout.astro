@@ -73,23 +73,28 @@ const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
 
     <!-- 描画される前にテーマを確定させる。
          あとから切り替えると一瞬ちらつくため、head の中で実行している。
-         保存された指定があればそれを、無ければアクセス時の季節と時刻を使う。 -->
+         何も選んでいなければ「季節なし・日中」。
+         「いまの時刻に合わせる」を選んでいれば、そのときの季節と時刻から決める。 -->
     <script is:inline>
       (function () {
-        var SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+        var SEASONS = ['none', 'spring', 'summer', 'autumn', 'winter'];
         var TIMES = ['dawn', 'day', 'dusk', 'night'];
         var root = document.documentElement;
         root.classList.remove('no-js');
 
-        var d = new Date();
-        var m = d.getMonth() + 1;
-        var h = d.getHours();
-        var season = m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : m <= 8 ? 'summer' : 'autumn';
-        var time = h < 5 ? 'night' : h < 9 ? 'dawn' : h < 17 ? 'day' : h < 19 ? 'dusk' : 'night';
+        // 既定。装飾のない、日中の明るい状態
+        var season = 'none';
+        var time = 'day';
 
         try {
           var saved = localStorage.getItem('qon-theme');
-          if (saved) {
+          if (saved === 'auto') {
+            var d = new Date();
+            var m = d.getMonth() + 1;
+            var h = d.getHours();
+            season = m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : m <= 8 ? 'summer' : 'autumn';
+            time = h < 5 ? 'night' : h < 9 ? 'dawn' : h < 17 ? 'day' : h < 19 ? 'dusk' : 'night';
+          } else if (saved) {
             var p = saved.split('/');
             // 保存値は書き換えられている可能性があるので、既知の値だけを受け入れる
             if (SEASONS.indexOf(p[0]) >= 0 && TIMES.indexOf(p[1]) >= 0) {
@@ -98,7 +103,7 @@ const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
             }
           }
         } catch (e) {
-          /* localStorage が使えない環境では自動判定のまま */
+          /* localStorage が使えない環境では既定のまま */
         }
 
         root.dataset.season = season;

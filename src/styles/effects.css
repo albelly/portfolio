@@ -40,7 +40,9 @@
   pointer-events: none;
 }
 
-/* 現在の季節のものだけを描く */
+/* 現在の季節のものだけを描く。
+   data-season='none'（季節なし）はどれにも当たらないので、何も描かれない。
+   .fx は position:fixed で本文の流れの外にあるため、消えてもレイアウトは変わらない。 */
 .fx__season {
   display: none;
 }

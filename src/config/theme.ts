@@ -10,7 +10,8 @@
  * このファイルは「名前」と「自動判定の境目」だけを持つ。
  */
 
-export type SeasonId = 'spring' | 'summer' | 'autumn' | 'winter';
+/** 'none' は季節のモチーフを出さない状態。空の色は時間帯に従う */
+export type SeasonId = 'none' | 'spring' | 'summer' | 'autumn' | 'winter';
 export type TimeId = 'dawn' | 'day' | 'dusk' | 'night';
 
 export interface Season {
@@ -28,6 +29,7 @@ export interface TimeBand {
 }
 
 export const seasons: Season[] = [
+  { id: 'none', label: 'なし', motif: '装飾なし' },
   { id: 'spring', label: '春', motif: '桜' },
   { id: 'summer', label: '夏', motif: '風鈴' },
   { id: 'autumn', label: '秋', motif: '紅葉' },
@@ -41,13 +43,17 @@ export const timeBands: TimeBand[] = [
   { id: 'night', label: '夜', hours: '19〜5時' },
 ];
 
-/** 既定のテーマ。JavaScript が無効な環境ではこれが表示される */
-export const defaultTheme = { season: 'autumn' as SeasonId, time: 'day' as TimeId };
+/**
+ * 既定のテーマ。何も選んでいない初回のアクセスと、JavaScript が無効な環境ではこれになる。
+ * 装飾のない、日中の明るく見やすい状態で最初に見せる。
+ */
+export const defaultTheme = { season: 'none' as SeasonId, time: 'day' as TimeId };
 
-/** 「秋の日中」のような表示名を作る */
+/** 「秋の日中」「季節なし・日中」のような表示名を作る */
 export function themeName(season: SeasonId, time: TimeId): string {
-  const s = seasons.find((x) => x.id === season)?.label ?? '';
   const t = timeBands.find((x) => x.id === time)?.label ?? '';
+  if (season === 'none') return `季節なし・${t}`;
+  const s = seasons.find((x) => x.id === season)?.label ?? '';
   return `${s}の${t}`;
 }
 
@@ -60,5 +66,11 @@ export const themeLabels = {
   times: Object.fromEntries(timeBands.map((t) => [t.id, t.label])),
 };
 
-/** localStorage のキー */
+/**
+ * localStorage のキー。保存される値は次のどちらか。
+ *   'auto'            … 「いまの時刻に合わせる」を選んだ状態。訪問のたびに時計から決める
+ *   'autumn/night' 等 … 手動で選んだ季節と時間帯
+ * 何も保存されていなければ defaultTheme（季節なし・日中）になる。
+ */
 export const STORAGE_KEY = 'qon-theme';
+export const AUTO_VALUE = 'auto';
