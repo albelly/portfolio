@@ -17,6 +17,7 @@ import '../styles/tokens.css';
 import '../styles/seasons.css';
 import '../styles/themes.css';
 import '../styles/global.css';
+import '../styles/effects.css';
 
 import CategoryTabs from '../components/CategoryTabs.astro';
 import FloatingMenu from '../components/FloatingMenu.astro';
@@ -24,6 +25,7 @@ import Footer from '../components/Footer.astro';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import Reveal from '../components/Reveal.astro';
 import Seal from '../components/Seal.astro';
+import SeasonEffects from '../components/SeasonEffects.astro';
 import { defaultTheme, themeName } from '../config/theme';
 import { profile, site, type NavId, type ThemeName } from '../config/site';
 
@@ -148,6 +150,9 @@ const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
         </filter>
       </defs>
     </svg>
+
+    <!-- 季節のモチーフ。常に本文の背面に置き、クリックは拾わない -->
+    <SeasonEffects />
 
     <a class="skip-link" href="#main">本文へスキップ</a>
 

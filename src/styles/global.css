@@ -50,6 +50,14 @@ body {
   font-feature-settings: 'palt' 1; /* 日本語の約物を詰める */
 }
 
+/* 季節のモチーフ（.fx）は背面に敷くため、中身は必ず手前に置く */
+body > header,
+body > main,
+body > footer {
+  position: relative;
+  z-index: 1;
+}
+
 img,
 picture,
 svg,

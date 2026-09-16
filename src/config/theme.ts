@@ -3,11 +3,10 @@
  *
  * 【考え方】
  *  2つの軸に別々の役割を持たせている。
- *   季節 → 差し色の色相と、紙の色み（すべて和の赤の系統に留める）
- *   時間 → 明度帯（紙と墨の明るさ）
- *  こうすると、どの組み合わせでも配色が破綻しない。
+ *   季節 → 自然のモチーフ（桜・風鈴・紅葉・雪）。色は持たない
+ *   時間 → 色（空・紙・墨・差し色のすべて）
  *
- * 実際の色の値は src/styles/seasons.css にある。
+ * 色の値は src/styles/seasons.css、モチーフは src/styles/effects.css にある。
  * このファイルは「名前」と「自動判定の境目」だけを持つ。
  */
 
@@ -17,8 +16,8 @@ export type TimeId = 'dawn' | 'day' | 'dusk' | 'night';
 export interface Season {
   id: SeasonId;
   label: string;
-  /** 差し色の和名（切替パネルの補足に出す） */
-  accentName: string;
+  /** 季節を表すモチーフ（切替パネルの補足に出す） */
+  motif: string;
 }
 
 export interface TimeBand {
@@ -29,10 +28,10 @@ export interface TimeBand {
 }
 
 export const seasons: Season[] = [
-  { id: 'spring', label: '春', accentName: '紅梅' },
-  { id: 'summer', label: '夏', accentName: '緋' },
-  { id: 'autumn', label: '秋', accentName: '朱' },
-  { id: 'winter', label: '冬', accentName: '蘇芳' },
+  { id: 'spring', label: '春', motif: '桜' },
+  { id: 'summer', label: '夏', motif: '風鈴' },
+  { id: 'autumn', label: '秋', motif: '紅葉' },
+  { id: 'winter', label: '冬', motif: '雪' },
 ];
 
 export const timeBands: TimeBand[] = [

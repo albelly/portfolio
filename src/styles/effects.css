@@ -1,0 +1,296 @@
+/**
+ * 季節のモチーフ。
+ *
+ * 季節は色ではなく、自然のモチーフで表す。
+ *   春 … 桜の花びらが舞う ＋ 右上に桜の枝
+ *   夏 … 左上から差し込む光芒 ＋ 漂う光の粒 ＋ 右上に風鈴
+ *   秋 … 紅葉が舞う ＋ 画面下部に落ち葉
+ *   冬 … 雪が降る ＋ 画面下部に積雪
+ *
+ * 【作り方】
+ *  外部の画像素材は使わない。形は mask-image のデータURI で1回だけ定義し、
+ *  色は background-color なので時間帯のテーマに自動で追従する。
+ *
+ * 【負荷対策】
+ *  - 粒子ひとつにつき要素1つ・アニメーション1つ
+ *  - 動かすのは transform と opacity だけ（レイアウトを起こさない）
+ *  - 位置や速度の乱数はビルド時に決めて CSS 変数として焼き込む（JSは0行）
+ *  - 表示していない季節は display:none なので、動くのは現在の季節だけ
+ *
+ * 【本文の邪魔をしない】
+ *  常に本文の背面（z-index 0）に置き、pointer-events: none でクリックを拾わない。
+ *
+ * 【調整のしかた】
+ *  量        … SeasonEffects.astro の COUNTS
+ *  速さ      … 同ファイルの dur の範囲
+ *  濃さ      … seasons.css の --fx-o
+ *  色の明るさ … seasons.css の --fx-l / --fx-l-pale
+ */
+
+/* ------------------------------------------------------------------
+ * 土台
+ * ------------------------------------------------------------------ */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* 装飾なので、クリックやタップを一切拾わない */
+  pointer-events: none;
+}
+
+/* 現在の季節のものだけを描く */
+.fx__season {
+  display: none;
+}
+
+[data-season='spring'] .fx__season--spring,
+[data-season='summer'] .fx__season--summer,
+[data-season='autumn'] .fx__season--autumn,
+[data-season='winter'] .fx__season--winter {
+  display: block;
+}
+
+/* 粒子の共通の持ちもの。位置と速度は要素ごとのインライン変数で渡す */
+.fx__bit {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  opacity: 0;
+  animation-duration: var(--dur);
+  animation-delay: var(--delay);
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------
+ * 春 ― 桜
+ * ------------------------------------------------------------------ */
+.fx__petal {
+  background-color: var(--fx-petal);
+  /* 花びらの形。先が少しくぼんだ桜の一片 */
+  --shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 35'%3E%3Cpath d='M12 0C18 7 24 15 24 22c0 7-5 12-12 8-7 4-12-1-12-8C0 15 6 7 12 0z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--shape);
+  mask-image: var(--shape);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  height: calc(var(--size) * 1.35);
+  animation-name: fx-fall;
+}
+
+/* ------------------------------------------------------------------
+ * 秋 ― 紅葉
+ * ------------------------------------------------------------------ */
+.fx__leaf {
+  --shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 2l8 22 18-8-6 20h22L76 52l12 18-22-6-2 24-14-16-14 16-2-24-22 6 12-18L8 36h22l-6-20 18 8z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-image: var(--shape);
+  mask-image: var(--shape);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation-name: fx-fall;
+}
+
+.fx__leaf--a {
+  background-color: var(--fx-leaf-a);
+}
+.fx__leaf--b {
+  background-color: var(--fx-leaf-b);
+}
+.fx__leaf--c {
+  background-color: var(--fx-leaf-c);
+}
+
+/* ------------------------------------------------------------------
+ * 冬 ― 雪
+ * ------------------------------------------------------------------ */
+.fx__snow {
+  background-color: var(--fx-snow);
+  border-radius: 50%;
+  animation-name: fx-snow;
+  animation-timing-function: ease-in-out;
+}
+
+/* ------------------------------------------------------------------
+ * 夏 ― 光芒と光の粒
+ * ------------------------------------------------------------------ */
+.fx__ray {
+  position: absolute;
+  top: -50vh;
+  left: var(--x);
+  width: var(--size);
+  height: 190vh;
+  background: linear-gradient(to bottom, var(--fx-ray), transparent 78%);
+  opacity: calc(var(--fx-o) * 0.7);
+  transform: rotate(var(--tilt));
+  transform-origin: top center;
+  filter: blur(4px);
+  animation: fx-ray var(--dur) ease-in-out var(--delay) infinite alternate;
+  will-change: opacity;
+}
+
+.fx__mote {
+  background-color: var(--fx-ray);
+  border-radius: 50%;
+  top: auto;
+  bottom: -5vh;
+  filter: blur(1px);
+  animation-name: fx-mote;
+  animation-timing-function: ease-in-out;
+}
+
+/* ------------------------------------------------------------------
+ * 隅の演出
+ * ------------------------------------------------------------------ */
+
+/* 右上（桜の枝・風鈴） */
+.fx__corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: var(--color-muted);
+  opacity: var(--fx-o);
+}
+
+.fx__corner svg {
+  display: block;
+  width: clamp(9rem, 22vw, 17rem);
+  height: auto;
+}
+
+/* 画面下部（落ち葉・積雪） */
+.fx__ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: var(--fx-o);
+}
+
+.fx__ground svg {
+  display: block;
+  width: 100%;
+  height: clamp(3.5rem, 9vh, 6rem);
+}
+
+/* 風鈴の短冊。ゆっくり揺れる */
+.fx__tanzaku {
+  transform-origin: 50% 0;
+  animation: fx-swing 4.2s ease-in-out infinite alternate;
+}
+
+/* ------------------------------------------------------------------
+ * 動き
+ * ------------------------------------------------------------------ */
+
+/* 舞い落ちる。横揺れと回転を1つにまとめて、要素ごとの負荷を抑えている */
+@keyframes fx-fall {
+  0% {
+    transform: translate3d(0, -14vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--fx-o);
+  }
+  25% {
+    transform: translate3d(var(--sway), 16vh, 0) rotate(130deg);
+  }
+  50% {
+    transform: translate3d(0, 46vh, 0) rotate(240deg);
+  }
+  75% {
+    transform: translate3d(calc(var(--sway) * -1), 76vh, 0) rotate(330deg);
+  }
+  90% {
+    opacity: var(--fx-o);
+  }
+  100% {
+    transform: translate3d(0, 116vh, 0) rotate(430deg);
+    opacity: 0;
+  }
+}
+
+/* 雪。回転させず、しんしんと落とす */
+@keyframes fx-snow {
+  0% {
+    transform: translate3d(0, -8vh, 0);
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--fx-o);
+  }
+  50% {
+    transform: translate3d(var(--sway), 50vh, 0);
+  }
+  88% {
+    opacity: var(--fx-o);
+  }
+  100% {
+    transform: translate3d(0, 112vh, 0);
+    opacity: 0;
+  }
+}
+
+/* 光の粒。ゆっくり浮かび上がる */
+@keyframes fx-mote {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  22% {
+    opacity: calc(var(--fx-o) * 0.75);
+  }
+  78% {
+    opacity: calc(var(--fx-o) * 0.75);
+  }
+  100% {
+    transform: translate3d(var(--sway), -78vh, 0);
+    opacity: 0;
+  }
+}
+
+/* 光芒。射し込む強さがゆっくり変わる */
+@keyframes fx-ray {
+  from {
+    opacity: calc(var(--fx-o) * 0.45);
+  }
+  to {
+    opacity: calc(var(--fx-o) * 0.92);
+  }
+}
+
+/* 風鈴の短冊 */
+@keyframes fx-swing {
+  from {
+    transform: rotate(-7deg);
+  }
+  to {
+    transform: rotate(7deg);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * 動きを減らす設定のとき
+ * 舞うものは消し、隅の演出は静止させる。
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .fx__field {
+    display: none;
+  }
+
+  .fx__corner *,
+  .fx__ground * {
+    animation: none !important;
+  }
+}
+
+/* JavaScript が無効なときは季節が決まらないので、何も出さない */
+html.no-js .fx {
+  display: none;
+}

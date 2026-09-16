@@ -1,0 +1,233 @@
+---
+/**
+ * 季節のモチーフ。
+ *
+ * 4季節ぶんをすべて書き出しておき、CSS で現在の季節だけを表示する。
+ * こうすると切り替えが即座で、動くのは表示中の季節の分だけになる。
+ *
+ * 位置・速度・大きさ・揺れ幅は、固定の種から作った乱数でビルド時に決める。
+ * 実行時の JavaScript は使わない。
+ *
+ * 【強さの調整はここ】
+ *   COUNTS … 枚数・粒数
+ *   各 make... の dur … 落ちる速さ（秒）
+ *   sway … 横揺れの幅
+ * 濃さと色は seasons.css の --fx-o / --fx-l で調整する。
+ */
+
+/** 毎回同じ並びになるよう、種を決めた簡単な乱数を使う */
+function makeRng(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+const rng = makeRng(20260916);
+const pick = (min: number, max: number) => min + rng() * (max - min);
+
+/* --- 強さの設定 --- */
+const COUNTS = {
+  petal: 30, // 桜の花びら
+  leaf: 26, // 紅葉
+  snow: 50, // 雪
+  ray: 4, // 光芒
+  mote: 14, // 光の粒
+};
+
+type Bit = { style: string; cls?: string };
+
+/** 舞い落ちるものを作る */
+function makeFalling(n: number, sizeMin: number, sizeMax: number, durMin: number, durMax: number) {
+  const bits: Bit[] = [];
+  for (let i = 0; i < n; i++) {
+    const size = pick(sizeMin, sizeMax);
+    bits.push({
+      style: [
+        `--x:${pick(-4, 100).toFixed(2)}%`,
+        `--size:${size.toFixed(1)}px`,
+        `--dur:${pick(durMin, durMax).toFixed(2)}s`,
+        `--delay:${(-pick(0, durMax)).toFixed(2)}s`,
+        `--sway:${pick(20, 90).toFixed(0)}px`,
+      ].join(';'),
+    });
+  }
+  return bits;
+}
+
+const petals = makeFalling(COUNTS.petal, 9, 18, 11, 22);
+
+const leafTones = ['a', 'b', 'c'];
+const leaves = makeFalling(COUNTS.leaf, 13, 26, 10, 19).map((b, i) => ({
+  ...b,
+  cls: `fx__leaf--${leafTones[i % 3]}`,
+}));
+
+const snow = makeFalling(COUNTS.snow, 3, 8, 9, 20);
+
+const rays = Array.from({ length: COUNTS.ray }, (_, i) => ({
+  style: [
+    `--x:${(-16 + i * 13).toFixed(0)}vw`,
+    `--size:${pick(5, 11).toFixed(1)}vw`,
+    `--tilt:${pick(18, 27).toFixed(1)}deg`,
+    `--dur:${pick(7, 13).toFixed(2)}s`,
+    `--delay:${(-pick(0, 6)).toFixed(2)}s`,
+  ].join(';'),
+}));
+
+const motes = Array.from({ length: COUNTS.mote }, () => ({
+  style: [
+    `--x:${pick(0, 100).toFixed(2)}%`,
+    `--size:${pick(3, 7).toFixed(1)}px`,
+    `--dur:${pick(16, 30).toFixed(2)}s`,
+    `--delay:${(-pick(0, 24)).toFixed(2)}s`,
+    `--sway:${pick(-70, 70).toFixed(0)}px`,
+  ].join(';'),
+}));
+---
+
+<div class="fx" aria-hidden="true">
+  {/* ---------------- 春 ― 桜 ---------------- */}
+  <div class="fx__season fx__season--spring">
+    <div class="fx__field">
+      {petals.map((p) => <span class="fx__bit fx__petal" style={p.style} />)}
+    </div>
+
+    {/* 右上の桜の枝 */}
+    <div class="fx__corner">
+      <svg viewBox="0 0 260 150" fill="none">
+        <path
+          d="M260 12c-30 6-58 20-82 40-18 15-32 33-52 44-16 9-34 13-52 13"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          opacity="0.55"></path>
+        <path
+          d="M214 40c-6 16-8 33-6 50M168 78c-14 6-29 9-44 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.45"></path>
+        {
+          [
+            [238, 22, 11],
+            [206, 44, 9],
+            [208, 92, 8],
+            [166, 78, 10],
+            [124, 88, 8.5],
+            [88, 100, 7],
+          ].map(([cx, cy, r]) => (
+            <g transform={`translate(${cx} ${cy})`} fill="var(--fx-petal)">
+              <circle cx="0" cy={-r} r={r * 0.62} />
+              <circle cx={r * 0.95} cy={-r * 0.3} r={r * 0.62} />
+              <circle cx={r * 0.59} cy={r * 0.81} r={r * 0.62} />
+              <circle cx={-r * 0.59} cy={r * 0.81} r={r * 0.62} />
+              <circle cx={-r * 0.95} cy={-r * 0.3} r={r * 0.62} />
+              <circle cx="0" cy="0" r={r * 0.3} fill="var(--color-accent)" opacity="0.8" />
+            </g>
+          ))
+        }
+      </svg>
+    </div>
+  </div>
+
+  {/* ---------------- 夏 ― 光芒と風鈴 ---------------- */}
+  <div class="fx__season fx__season--summer">
+    <div class="fx__field">
+      {rays.map((r) => <span class="fx__ray" style={r.style} />)}
+      {motes.map((m) => <span class="fx__bit fx__mote" style={m.style} />)}
+    </div>
+
+    {/* 右上の風鈴 */}
+    <div class="fx__corner">
+      <svg viewBox="0 0 200 230" fill="none">
+        <path d="M150 0v44" stroke="currentColor" stroke-width="2.5" opacity="0.5"></path>
+        {/* 硝子の笠 */}
+        <path
+          d="M114 96c0-20 16-36 36-36s36 16 36 36v10c0 4-3 7-7 7h-58c-4 0-7-3-7-7z"
+          fill="var(--fx-glass)"
+          opacity="0.75"></path>
+        <path
+          d="M114 96c0-20 16-36 36-36s36 16 36 36v10c0 4-3 7-7 7h-58c-4 0-7-3-7-7z"
+          stroke="currentColor"
+          stroke-width="2"
+          opacity="0.5"></path>
+        <path d="M128 78c2-9 9-15 17-17" stroke="var(--color-paper)" stroke-width="3" opacity="0.7"
+        ></path>
+        {/* 舌と短冊 */}
+        <g class="fx__tanzaku">
+          <path d="M150 113v22" stroke="currentColor" stroke-width="2" opacity="0.5"></path>
+          <rect
+            x="140"
+            y="135"
+            width="20"
+            height="62"
+            rx="2"
+            fill="var(--color-accent)"
+            opacity="0.85"></rect>
+          <path d="M150 197v20" stroke="currentColor" stroke-width="1.6" opacity="0.4"></path>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  {/* ---------------- 秋 ― 紅葉 ---------------- */}
+  <div class="fx__season fx__season--autumn">
+    <div class="fx__field">
+      {leaves.map((l) => <span class={`fx__bit fx__leaf ${l.cls}`} style={l.style} />)}
+    </div>
+
+    {/* 画面下部の落ち葉 */}
+    <div class="fx__ground">
+      <svg viewBox="0 0 1200 90" preserveAspectRatio="none" fill="none">
+        <path
+          d="M0 90V62c60-10 120 4 180-2s120-20 180-14 120 22 180 18 120-22 180-18 120 20 180 16 120-16 120-16v44z"
+          fill="var(--fx-leaf-b)"
+          opacity="0.3"></path>
+        <path
+          d="M0 90V72c70-8 140 6 210 0s140-16 210-10 140 18 210 14 140-16 210-12 160 12 160 12v14z"
+          fill="var(--fx-leaf-a)"
+          opacity="0.35"></path>
+        {
+          [
+            [90, 58, 15, -18],
+            [260, 50, 19, 24],
+            [430, 62, 14, -8],
+            [610, 48, 21, 12],
+            [780, 60, 16, -26],
+            [950, 52, 18, 8],
+            [1110, 60, 15, 20],
+          ].map(([x, y, s, rot], i) => (
+            <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${Number(s) / 100})`}>
+              <path
+                d="M50 2l8 22 18-8-6 20h22L76 52l12 18-22-6-2 24-14-16-14 16-2-24-22 6 12-18L8 36h22l-6-20 18 8z"
+                fill={`var(--fx-leaf-${['a', 'b', 'c'][i % 3]})`}
+                opacity="0.8"
+              />
+            </g>
+          ))
+        }
+      </svg>
+    </div>
+  </div>
+
+  {/* ---------------- 冬 ― 雪 ---------------- */}
+  <div class="fx__season fx__season--winter">
+    <div class="fx__field">{snow.map((s) => <span class="fx__bit fx__snow" style={s.style} />)}</div>
+
+    {/* 画面下部の積雪 */}
+    <div class="fx__ground">
+      <svg viewBox="0 0 1200 90" preserveAspectRatio="none" fill="none">
+        <path
+          d="M0 90V66c80-14 150 2 230-4s150-18 230-12 150 20 230 14 150-18 230-12 80 12 280 10v28z"
+          fill="var(--fx-snow)"
+          opacity="0.4"></path>
+        <path
+          d="M0 90V76c100-10 190 4 290-2s180-14 280-8 190 16 290 10 140-10 340-8v22z"
+          fill="var(--fx-snow)"
+          opacity="0.72"></path>
+      </svg>
+    </div>
+  </div>
+</div>

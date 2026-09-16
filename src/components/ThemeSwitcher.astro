@@ -26,7 +26,7 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
 
   <div class="switcher__panel" id="theme-panel" hidden>
     <p class="switcher__lead">
-      季節と時間帯で配色が変わります。<br />
+      季節はモチーフ、時間帯は空の色で変わります。<br />
       いまの時刻に合わせて自動で切り替わります。
     </p>
 
@@ -42,7 +42,7 @@ import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
               aria-pressed="false"
             >
               <span class="switcher__option-label">{s.label}</span>
-              <span class="switcher__option-note">{s.accentName}</span>
+              <span class="switcher__option-note">{s.motif}</span>
             </button>
           ))
         }
