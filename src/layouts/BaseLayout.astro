@@ -23,6 +23,7 @@ import FloatingMenu from '../components/FloatingMenu.astro';
 import Footer from '../components/Footer.astro';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import Reveal from '../components/Reveal.astro';
+import Seal from '../components/Seal.astro';
 import { defaultTheme, themeName } from '../config/theme';
 import { profile, site, type NavId, type ThemeName } from '../config/site';
 
@@ -105,13 +106,56 @@ const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
   </head>
 
   <body>
+    <!-- 落款の筆あと。ノイズで輪郭を崩し、かすれを作る。
+         描画されない図形なので、画面には出ない。 -->
+    <svg class="visually-hidden" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="seal-brush" x="-25%" y="-35%" width="150%" height="170%">
+          <!-- 輪郭をゆらす -->
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.05 0.08"
+            numOctaves="3"
+            seed="11"
+            result="wobble"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="wobble"
+            scale="4.5"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="rough"
+          />
+          <!-- かすれ。粗いノイズを閾値でまだらにして、アルファを削る -->
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85 0.2"
+            numOctaves="2"
+            seed="5"
+            result="grain"
+          />
+          <feColorMatrix
+            in="grain"
+            type="matrix"
+            values="0 0 0 0 0
+                    0 0 0 0 0
+                    0 0 0 0 0
+                    2.4 0 0 0 -1.5"
+            result="dry"
+          />
+          <feComposite in="rough" in2="dry" operator="out" />
+        </filter>
+      </defs>
+    </svg>
+
     <a class="skip-link" href="#main">本文へスキップ</a>
 
     <header class="site-header">
       <div class="container site-header__inner">
         <div class="site-header__identity">
           <a class="site-header__brand" href="/">
-            <span class="seal">{profile.name}</span>
+            <Seal>{profile.name}</Seal>
             <span class="site-header__role">{profile.role}</span>
           </a>
           <!-- いまの配色の名前。色に意味があることを伝えるために常時出す -->
@@ -137,8 +181,9 @@ const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
 </html>
 
 <style>
+  /* 空を透かすため、ヘッダーには地色を敷かない */
   .site-header {
-    background: var(--color-paper);
+    background: transparent;
     border-bottom: var(--rule-width) solid var(--color-rule);
   }
 

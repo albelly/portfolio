@@ -3,6 +3,7 @@
  * フッター。奥付のように、静かに情報だけを置く。
  */
 import { profile, navItems } from '../config/site';
+import Seal from './Seal.astro';
 
 const year = new Date().getFullYear();
 ---
@@ -11,7 +12,7 @@ const year = new Date().getFullYear();
   <div class="container site-footer__inner">
     <div class="site-footer__identity">
       {/* 落款。縦組の朱印で署名のように置く */}
-      <span class="seal seal--vertical">{profile.name}</span>
+      <Seal>{profile.name}</Seal>
       <p class="site-footer__role">{profile.role}</p>
     </div>
 

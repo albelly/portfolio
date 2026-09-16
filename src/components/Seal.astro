@@ -1,0 +1,81 @@
+---
+/**
+ * 落款（印章）。
+ *
+ * 真四角のはんこではなく、筆で押したような不定形の形にしている。
+ *
+ * 【作り方】
+ *  外部の筆ブラシ素材や画像は使わず、すべてコードで作っている。
+ *   1. 形そのものを、辺がうねる手描きのパスで描く
+ *      （フィルタが効かない環境でも四角には戻らない）
+ *   2. feTurbulence + feDisplacementMap で輪郭をさらに崩す
+ *   3. 粗いノイズを閾値でまだらにし、アルファを削って「かすれ」を作る
+ *   4. うっすら広げた影を下に敷いて「にじみ」を出す
+ *
+ * 【色】
+ *  fill は currentColor。CSS 側で color: var(--color-accent) を渡すので、
+ *  16通りのテーマすべてに自動で追従する。
+ *
+ * 【読み上げ】
+ *  図版は装飾なので aria-hidden。名前は実テキストとして別に置く。
+ *
+ * フィルタの定義は BaseLayout に1つだけ置いてある（#seal-brush）。
+ */
+---
+
+<span class="seal">
+  <svg class="seal__ink" viewBox="0 0 120 46" preserveAspectRatio="none" aria-hidden="true">
+    <!-- にじみ。輪郭より少し外側に薄く広げる -->
+    <path
+      class="seal__bleed"
+      d="M7,9 C12,3.4 25,4.6 38,4 C52,3.4 66,5 80,4.2 C90,3.7 100,5.6 102,12 C104,18.6 103,26 102,32.5 C100.6,39 91,41 78,40.4 C61,39.6 44,41 27,40.4 C15,40 5,38.6 4.2,31 C3.4,23 3.6,15 7,9 Z"
+    ></path>
+    <!-- 本体 -->
+    <path
+      class="seal__body"
+      d="M8.5,10.5 C13,5.6 25.5,6.6 38,6 C51.5,5.4 65,7 78.5,6.2 C88,5.8 97.5,7.4 99.5,13.2 C101.4,19 100.5,25.8 99.6,31.6 C98.4,37.4 89.5,39.2 77,38.7 C60.5,38 44,39.2 27.5,38.7 C16,38.3 6.6,37 5.9,30 C5.2,22.6 5.4,15 8.5,10.5 Z"
+    ></path>
+  </svg>
+  <span class="seal__text"><slot /></span>
+</span>
+
+<style>
+  .seal {
+    position: relative;
+    display: inline-block;
+    padding: 0.34em 0.78em 0.38em;
+    /* SVG の fill="currentColor" がこの色を拾う */
+    color: var(--color-accent);
+    line-height: 1.4;
+    transition: color var(--dur-theme) var(--ease-out);
+  }
+
+  .seal__ink {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* 輪郭のゆらぎとかすれ。効かない環境でもパスは不定形のまま */
+    filter: url(#seal-brush);
+  }
+
+  .seal__body {
+    fill: currentColor;
+  }
+
+  /* にじみ。薄く敷いて、紙に墨が広がった感じを出す */
+  .seal__bleed {
+    fill: currentColor;
+    opacity: 0.22;
+  }
+
+  .seal__text {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--color-on-accent);
+    transition: color var(--dur-theme) var(--ease-out);
+  }
+</style>

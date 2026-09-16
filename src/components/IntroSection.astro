@@ -22,11 +22,7 @@ const { heading, lead, variant = 'full' } = Astro.props;
 
 <section class={`intro intro--${variant}`}>
   <div class="container">
-    <div class="intro__catch">
-      <h1 class="intro__heading">{heading ?? profile.tagline}</h1>
-      {/* 柱。和の書籍にならい、版面の端に縦組で仕事の内容を添える */}
-      <p class="intro__column vertical">Webサイト・LP制作</p>
-    </div>
+    <h1 class="intro__heading">{heading ?? profile.tagline}</h1>
 
     <div class="prose intro__body">
       {lead ? <p>{lead}</p> : profile.intro.map((paragraph) => <p>{paragraph}</p>)}
@@ -71,32 +67,8 @@ const { heading, lead, variant = 'full' } = Astro.props;
     padding-block: var(--space-xl) var(--space-2xl);
   }
 
-  /* 見出しと縦組の柱。狭い画面では柱を隠す */
-  .intro__catch {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-xl);
-  }
-
   .intro__heading {
     max-width: 22em;
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .intro__column {
-    flex: 0 0 auto;
-    margin-left: auto;
-    font-family: var(--font-display);
-    font-size: var(--text-sm);
-    color: var(--color-neutral);
-    max-height: 14em;
-  }
-
-  @media (max-width: 60rem) {
-    .intro__column {
-      display: none;
-    }
   }
 
   .intro__body {

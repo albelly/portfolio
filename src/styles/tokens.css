@@ -121,6 +121,13 @@
   --t-c-text-mul: 2;
   --t-c-accent-mul: 1;
 
+  --sky-h: 245;
+  --sky-c: 0.05;
+  --sky-l1: 88%;
+  --sky-a1: 0.4;
+  --sky-l2: 95%;
+  --sky-a2: 0.15;
+
   /* --- 組み立て --- */
 
   /* 紙・罫の色相。夕暮れのときだけ seasons.css 側で差し替わる */
@@ -146,6 +153,11 @@
   --color-accent-soft: oklch(var(--t-l-accent-soft) calc(var(--c-accent) * 0.16) var(--s-h-accent));
   --color-on-accent: oklch(var(--t-l-on-accent) var(--c-surface) var(--h-surface));
   --color-focus: var(--color-accent);
+
+  /* 空。紙の上に半透明で重ねる3段のグラデーション */
+  --sky-1: oklch(var(--sky-l1) var(--sky-c) var(--sky-h) / var(--sky-a1));
+  --sky-2: oklch(var(--sky-l2) var(--sky-c) var(--sky-h) / var(--sky-a2));
+  --sky-0: oklch(var(--sky-l2) var(--sky-c) var(--sky-h) / 0);
 
   /* テーマが切り替わったときに、色だけをなめらかに移す */
   --dur-theme: 420ms;

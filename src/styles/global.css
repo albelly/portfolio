@@ -22,6 +22,9 @@ html {
   scroll-padding-top: var(--space-xl);
   /* 横スクロールは常に起こさない。hidden ではなく clip を使う */
   overflow-x: clip;
+  /* 紙の色は html に置く。body の背景が画面全体に伝播するのを防ぐため */
+  background-color: var(--color-paper);
+  transition: background-color var(--dur-theme) var(--ease-out);
 }
 
 body {
@@ -33,7 +36,16 @@ body {
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
   color: var(--color-ink);
-  background: var(--color-paper);
+  /* 時間帯の空。ページ上部にだけ置き、90vh で完全に消える。
+     本文の大半は無地の紙の上に乗るので、可読性は落ちない。 */
+  background-color: transparent;
+  background-image: linear-gradient(
+    to bottom,
+    var(--sky-1) 0,
+    var(--sky-2) 38vh,
+    var(--sky-0) 90vh
+  );
+  background-repeat: no-repeat;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'palt' 1; /* 日本語の約物を詰める */
 }
@@ -422,45 +434,6 @@ main {
   color: var(--color-neutral);
   font-size: var(--text-sm);
   text-align: center;
-}
-
-/* ------------------------------------------------------------------
- * 印章（はんこ）
- * 朱の地に紙色の文字。差し色のまとまった使いどころはここだけにする。
- * ------------------------------------------------------------------ */
-.seal {
-  display: inline-block;
-  padding: 0.3em 0.6em 0.34em;
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-family: var(--font-display);
-  font-size: var(--text-base);
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.1em;
-  /* 角をわずかに欠けさせ、押した印らしくする */
-  border-radius: 1px 3px 1px 3px;
-  transition:
-    background-color var(--dur-theme) var(--ease-out),
-    color var(--dur-theme) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out);
-}
-
-/* 縦組みの印。落款に使う */
-.seal--vertical {
-  writing-mode: vertical-rl;
-  padding: 0.6em 0.3em;
-  letter-spacing: 0.14em;
-}
-
-/* ------------------------------------------------------------------
- * 縦書き
- * ------------------------------------------------------------------ */
-.vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  line-height: 1.6;
-  letter-spacing: 0.12em;
 }
 
 /* ------------------------------------------------------------------
