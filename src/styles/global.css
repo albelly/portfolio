@@ -36,14 +36,14 @@ body {
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
   color: var(--color-ink);
-  /* 時間帯の空。ページ上部にだけ置き、90vh で完全に消える。
-     本文の大半は無地の紙の上に乗るので、可読性は落ちない。 */
+  /* 時間帯の空。ページ上部に置き、112vh で完全に消える。
+     濃さは seasons.css の --sky-a1 / --sky-c で調整する。 */
   background-color: transparent;
   background-image: linear-gradient(
     to bottom,
     var(--sky-1) 0,
-    var(--sky-2) 38vh,
-    var(--sky-0) 90vh
+    var(--sky-2) 42vh,
+    var(--sky-0) 112vh
   );
   background-repeat: no-repeat;
   -webkit-font-smoothing: antialiased;

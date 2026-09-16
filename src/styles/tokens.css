@@ -122,11 +122,12 @@
   --t-c-accent-mul: 1;
 
   --sky-h: 245;
-  --sky-c: 0.05;
-  --sky-l1: 88%;
-  --sky-a1: 0.4;
-  --sky-l2: 95%;
-  --sky-a2: 0.15;
+  --sky-h2: 235;
+  --sky-c: 0.11;
+  --sky-l1: 80%;
+  --sky-a1: 0.66;
+  --sky-l2: 92%;
+  --sky-a2: 0.32;
 
   /* --- 組み立て --- */
 
@@ -156,8 +157,8 @@
 
   /* 空。紙の上に半透明で重ねる3段のグラデーション */
   --sky-1: oklch(var(--sky-l1) var(--sky-c) var(--sky-h) / var(--sky-a1));
-  --sky-2: oklch(var(--sky-l2) var(--sky-c) var(--sky-h) / var(--sky-a2));
-  --sky-0: oklch(var(--sky-l2) var(--sky-c) var(--sky-h) / 0);
+  --sky-2: oklch(var(--sky-l2) var(--sky-c) var(--sky-h2) / var(--sky-a2));
+  --sky-0: oklch(var(--sky-l2) var(--sky-c) var(--sky-h2) / 0);
 
   /* テーマが切り替わったときに、色だけをなめらかに移す */
   --dur-theme: 420ms;
