@@ -34,9 +34,12 @@ const items = worksByCategory(category.id);
 >
   <IntroSection heading={category.heading} lead={category.description} variant="compact" />
 
-  <section class="section">
+  <section class="section" data-reveal>
     <div class="container">
-      <h2 class="section__title">制作したもの</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">制作したもの</h2>
+      </div>
       <p class="section__lead">
         現在ポートフォリオを制作中です。準備ができ次第、順次掲載していきます。
       </p>
@@ -45,9 +48,15 @@ const items = worksByCategory(category.id);
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" data-reveal>
     <div class="container">
-      <h2 class="section__title">{category.detailHeading}</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">{category.detailHeading}</h2>
+      </div>
+      </div>
       <div class="placeholder">ご相談から公開までの流れなどは、この後の工程で追加します。</div>
     </div>
   </section>

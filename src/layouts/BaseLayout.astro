@@ -14,12 +14,16 @@
  *   themes.css の配色が切り替わる。
  */
 import '../styles/tokens.css';
+import '../styles/seasons.css';
 import '../styles/themes.css';
 import '../styles/global.css';
 
 import CategoryTabs from '../components/CategoryTabs.astro';
 import FloatingMenu from '../components/FloatingMenu.astro';
 import Footer from '../components/Footer.astro';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import Reveal from '../components/Reveal.astro';
+import { defaultTheme, themeName } from '../config/theme';
 import { profile, site, type NavId, type ThemeName } from '../config/site';
 
 interface Props {
@@ -34,6 +38,9 @@ interface Props {
 const { title, description = site.description, theme = 'base', current = 'top' } = Astro.props;
 
 const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle}`;
+
+// JavaScript 無効時に表示される既定のテーマ名
+const fallbackThemeName = themeName(defaultTheme.season, defaultTheme.time);
 ---
 
 <!doctype html>
@@ -61,10 +68,39 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content={site.shortTitle} />
 
-    <!-- JavaScript が有効なら no-js クラスを外す。
-         スクロール連動メニューはJS前提のため、無効時は非表示にする。 -->
+    <!-- 描画される前にテーマを確定させる。
+         あとから切り替えると一瞬ちらつくため、head の中で実行している。
+         保存された指定があればそれを、無ければアクセス時の季節と時刻を使う。 -->
     <script is:inline>
-      document.documentElement.classList.remove('no-js');
+      (function () {
+        var SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+        var TIMES = ['dawn', 'day', 'dusk', 'night'];
+        var root = document.documentElement;
+        root.classList.remove('no-js');
+
+        var d = new Date();
+        var m = d.getMonth() + 1;
+        var h = d.getHours();
+        var season = m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : m <= 8 ? 'summer' : 'autumn';
+        var time = h < 5 ? 'night' : h < 9 ? 'dawn' : h < 17 ? 'day' : h < 19 ? 'dusk' : 'night';
+
+        try {
+          var saved = localStorage.getItem('qon-theme');
+          if (saved) {
+            var p = saved.split('/');
+            // 保存値は書き換えられている可能性があるので、既知の値だけを受け入れる
+            if (SEASONS.indexOf(p[0]) >= 0 && TIMES.indexOf(p[1]) >= 0) {
+              season = p[0];
+              time = p[1];
+            }
+          }
+        } catch (e) {
+          /* localStorage が使えない環境では自動判定のまま */
+        }
+
+        root.dataset.season = season;
+        root.dataset.time = time;
+      })();
     </script>
   </head>
 
@@ -73,10 +109,14 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
 
     <header class="site-header">
       <div class="container site-header__inner">
-        <a class="site-header__brand" href="/">
-          <span class="site-header__name">{profile.name}</span>
-          <span class="site-header__role">{profile.role}</span>
-        </a>
+        <div class="site-header__identity">
+          <a class="site-header__brand" href="/">
+            <span class="seal">{profile.name}</span>
+            <span class="site-header__role">{profile.role}</span>
+          </a>
+          <!-- いまの配色の名前。色に意味があることを伝えるために常時出す -->
+          <p class="site-header__theme" id="theme-header-label">{fallbackThemeName}</p>
+        </div>
         <CategoryTabs current={current} variant="bar" />
       </div>
     </header>
@@ -85,12 +125,14 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
     <div id="header-sentinel" aria-hidden="true"></div>
 
     <FloatingMenu current={current} />
+    <ThemeSwitcher />
 
     <main id="main">
       <slot />
     </main>
 
     <Footer />
+    <Reveal />
   </body>
 </html>
 
@@ -109,10 +151,13 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
     padding-block: var(--space-sm);
   }
 
-  .site-header__brand {
+  .site-header__identity {
     flex-shrink: 0;
+  }
+
+  .site-header__brand {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: var(--space-sm);
     color: var(--color-ink);
     white-space: nowrap;
@@ -122,22 +167,23 @@ const pageTitle = current === 'top' ? site.title : `${title} | ${site.shortTitle
     color: var(--color-ink);
   }
 
-  .site-header__brand:hover .site-header__name {
-    color: var(--color-accent);
-  }
-
-  .site-header__name {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transition: color var(--dur-fast) var(--ease-out);
+  .site-header__brand:hover .seal {
+    opacity: 0.85;
   }
 
   .site-header__role {
     font-size: var(--text-xs);
     color: var(--color-neutral);
     letter-spacing: var(--tracking-label);
+  }
+
+  /* いまの配色の名前 */
+  .site-header__theme {
+    margin-top: 0.2rem;
+    font-size: var(--text-2xs);
+    letter-spacing: var(--tracking-label);
+    color: var(--color-neutral);
+    white-space: nowrap;
   }
 
   /* 判定用の目印。見た目には一切影響しない */

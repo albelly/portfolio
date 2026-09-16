@@ -1,0 +1,152 @@
+/**
+ * 季節・時間帯テーマの色の定義。
+ *
+ * 【仕組み】
+ *  <html data-season="autumn" data-time="day"> の2つの属性で切り替わる。
+ *  季節と時間は別々の役割を持つため、4×4=16通りを個別に書く必要がない。
+ *
+ *    季節ブロック … 差し色の色相と、紙の色み
+ *    時間ブロック … 明度帯（紙と墨の明るさ）と、色みの強さ
+ *
+ *  実際の --color-* は tokens.css でこれらを組み立てて作る。
+ *
+ * 【調整のしかた】
+ *  「夜を全体的に明るくしたい」  → [data-time='night'] の明度を上げる
+ *  「秋の赤をもう少し濃く」      → [data-season='autumn'] の彩度を上げる
+ *  どちらも1ブロック触るだけで、関係する4テーマにまとめて反映される。
+ */
+
+/* ==========================================================
+ * 季節 ― 差し色の色相と紙の色み
+ *
+ * 差し色はすべて和の赤の系統に留める。青や緑には振らない。
+ * これが「墨と朱」の世界観を保つための担保になっている。
+ * ========================================================== */
+
+/* 春 ― 紅梅（こうばい）。桃がかった赤、紙はほんのり桜 */
+[data-season='spring'] {
+  --s-h-accent: 14;
+  --s-c-accent: 0.15;
+  --s-h-paper: 22;
+  --s-c-paper: 0.008;
+  --s-h-dusk: 38; /* 夕暮れ時の紙の色相 */
+}
+
+/* 夏 ― 緋（ひ）。冴えた赤、紙は涼やかな白 */
+[data-season='summer'] {
+  --s-h-accent: 30;
+  --s-c-accent: 0.18;
+  --s-h-paper: 205;
+  --s-c-paper: 0.005;
+  --s-h-dusk: 30;
+}
+
+/* 秋 ― 朱（しゅ）。現行の基準色、紙は生成り */
+[data-season='autumn'] {
+  --s-h-accent: 38;
+  --s-c-accent: 0.17;
+  --s-h-paper: 60;
+  --s-c-paper: 0.006;
+  --s-h-dusk: 62;
+}
+
+/* 冬 ― 蘇芳（すおう）。沈んだ深い赤、紙は雪の冷たさ */
+[data-season='winter'] {
+  --s-h-accent: 6;
+  --s-c-accent: 0.14;
+  --s-h-paper: 258;
+  --s-c-paper: 0.006;
+  --s-h-dusk: 16;
+}
+
+/* ==========================================================
+ * 時間帯 ― 明度帯
+ * ========================================================== */
+
+/* 早朝 ― 白々と明ける。最も淡く、色みを抑える */
+[data-time='dawn'] {
+  --t-l-paper: 98.5%;
+  --t-l-paper-2: 96.5%;
+  --t-l-paper-3: 94%;
+  --t-l-rule: 89%;
+  --t-l-rule-strong: 62%;
+  --t-l-neutral: 52%;
+  --t-l-muted: 45%;
+  --t-l-ink: 26%;
+
+  --t-l-accent: 52%;
+  --t-l-accent-hover: 43%;
+  --t-l-accent-soft: 96.5%;
+  --t-l-on-accent: 98%;
+
+  --t-c-surface-mul: 0.6;
+  --t-c-text-mul: 1.6;
+  --t-c-accent-mul: 0.92;
+}
+
+/* 日中 ― 基準。現行の配色にいちばん近い */
+[data-time='day'] {
+  --t-l-paper: 97.5%;
+  --t-l-paper-2: 95.5%;
+  --t-l-paper-3: 92.5%;
+  --t-l-rule: 87%;
+  --t-l-rule-strong: 60%;
+  --t-l-neutral: 51%;
+  --t-l-muted: 44%;
+  --t-l-ink: 22%;
+
+  --t-l-accent: 50%;
+  --t-l-accent-hover: 41%;
+  --t-l-accent-soft: 96%;
+  --t-l-on-accent: 98%;
+
+  --t-c-surface-mul: 1;
+  --t-c-text-mul: 2;
+  --t-c-accent-mul: 1;
+}
+
+/* 夕暮れ ― 紙が琥珀に沈む。色みをはっきり強める */
+[data-time='dusk'] {
+  --t-l-paper: 91%;
+  --t-l-paper-2: 87.5%;
+  --t-l-paper-3: 84%;
+  --t-l-rule: 78%;
+  --t-l-rule-strong: 54%;
+  --t-l-neutral: 46%;
+  --t-l-muted: 39%;
+  --t-l-ink: 19%;
+
+  --t-l-accent: 45%;
+  --t-l-accent-hover: 37%;
+  --t-l-accent-soft: 87%;
+  --t-l-on-accent: 97%;
+
+  --t-c-surface-mul: 5;
+  --t-c-text-mul: 2.6;
+  --t-c-accent-mul: 1.05;
+
+  /* 夕焼けは季節を問わず暖色になるため、紙の色相を夕暮れ用に差し替える */
+  --h-surface: var(--s-h-dusk);
+}
+
+/* 夜 ― 墨地に白。明暗が反転する */
+[data-time='night'] {
+  --t-l-paper: 18%;
+  --t-l-paper-2: 22%;
+  --t-l-paper-3: 26%;
+  --t-l-rule: 33%;
+  --t-l-rule-strong: 52%;
+  --t-l-neutral: 72%;
+  --t-l-muted: 82%;
+  --t-l-ink: 93%;
+
+  /* 暗い地の上では、差し色は明るく・彩度を落とす */
+  --t-l-accent: 70%;
+  --t-l-accent-hover: 80%;
+  --t-l-accent-soft: 27%;
+  --t-l-on-accent: 16%; /* 明るい朱の上に置くので墨側 */
+
+  --t-c-surface-mul: 1.6;
+  --t-c-text-mul: 1.2;
+  --t-c-accent-mul: 0.7;
+}

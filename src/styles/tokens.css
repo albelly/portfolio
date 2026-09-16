@@ -84,24 +84,82 @@
   --dur-base: 200ms;
 
   /* ============================================================
-   * 配色 ―「墨と朱」
+   * 配色 ―「墨と朱」＋ 季節・時間帯
    *
-   * 紙は純白ではなく生成り。文字は純黒ではなく墨。
-   * 中間色はすべて暖色側に振り、朱の差し色と同じ温度に揃えている。
-   * 朱は画面の3%以下にしか置かない（リンク・罫・現在位置の印）。
+   * 色は2つの軸から組み立てる。値そのものは seasons.css にある。
+   *   --s-* … 季節が決める（差し色の色相、紙の色み）
+   *   --t-* … 時間帯が決める（明度帯、色みの強さ）
+   *
+   * ここで定義しているのは「組み立て方」だけなので、
+   * 配色を変えたいときは seasons.css を触る。
+   *
+   * 紙は純白ではなく、墨は純黒ではない。
+   * 中間色はすべて差し色と同じ温度に揃えている。
+   * 差し色は画面の3%以下にしか置かない（リンク・罫・現在位置の印・落款）。
    * ============================================================ */
-  --color-paper: oklch(97.5% 0.006 60); /* 生成りの紙 */
-  --color-paper-2: oklch(95.5% 0.008 58); /* 一段沈めた面 */
-  --color-paper-3: oklch(92.5% 0.01 55); /* 画像の下地 */
-  --color-rule: oklch(87% 0.009 55); /* 罫線 */
-  --color-rule-strong: oklch(60% 0.013 50); /* 強い罫線・ボタンの枠（3:1 以上） */
-  --color-neutral: oklch(51% 0.012 50); /* 弱い文字（4.5:1 以上） */
-  --color-muted: oklch(44% 0.012 46); /* 補足の文字 */
-  --color-ink: oklch(22% 0.012 45); /* 墨（本文） */
 
-  --color-accent: oklch(50% 0.17 35); /* 朱 */
-  --color-accent-hover: oklch(41% 0.15 33);
-  --color-accent-soft: oklch(96% 0.022 40); /* 朱のごく薄い面 */
-  --color-on-accent: oklch(98% 0.005 60);
-  --color-focus: oklch(50% 0.17 35);
+  /* --- 既定値。JavaScript が無効な環境では「秋の日中」で表示される --- */
+  --s-h-accent: 38;
+  --s-c-accent: 0.17;
+  --s-h-paper: 60;
+  --s-c-paper: 0.006;
+  --s-h-dusk: 62;
+
+  --t-l-paper: 97.5%;
+  --t-l-paper-2: 95.5%;
+  --t-l-paper-3: 92.5%;
+  --t-l-rule: 87%;
+  --t-l-rule-strong: 60%;
+  --t-l-neutral: 51%;
+  --t-l-muted: 44%;
+  --t-l-ink: 22%;
+  --t-l-accent: 50%;
+  --t-l-accent-hover: 41%;
+  --t-l-accent-soft: 96%;
+  --t-l-on-accent: 98%;
+  --t-c-surface-mul: 1;
+  --t-c-text-mul: 2;
+  --t-c-accent-mul: 1;
+
+  /* --- 組み立て --- */
+
+  /* 紙・罫の色相。夕暮れのときだけ seasons.css 側で差し替わる */
+  --h-surface: var(--s-h-paper);
+  /* 面の色み。時間帯によって強さが変わる */
+  --c-surface: calc(var(--s-c-paper) * var(--t-c-surface-mul));
+  /* 文字の色み。面より少し強く乗せる */
+  --c-text: calc(var(--s-c-paper) * var(--t-c-text-mul));
+  /* 差し色の彩度 */
+  --c-accent: calc(var(--s-c-accent) * var(--t-c-accent-mul));
+
+  --color-paper: oklch(var(--t-l-paper) var(--c-surface) var(--h-surface));
+  --color-paper-2: oklch(var(--t-l-paper-2) var(--c-surface) var(--h-surface));
+  --color-paper-3: oklch(var(--t-l-paper-3) var(--c-surface) var(--h-surface));
+  --color-rule: oklch(var(--t-l-rule) var(--c-surface) var(--h-surface));
+  --color-rule-strong: oklch(var(--t-l-rule-strong) var(--c-text) var(--h-surface));
+  --color-neutral: oklch(var(--t-l-neutral) var(--c-text) var(--h-surface));
+  --color-muted: oklch(var(--t-l-muted) var(--c-text) var(--h-surface));
+  --color-ink: oklch(var(--t-l-ink) var(--c-text) var(--h-surface));
+
+  --color-accent: oklch(var(--t-l-accent) var(--c-accent) var(--s-h-accent));
+  --color-accent-hover: oklch(var(--t-l-accent-hover) var(--c-accent) var(--s-h-accent));
+  --color-accent-soft: oklch(var(--t-l-accent-soft) calc(var(--c-accent) * 0.16) var(--s-h-accent));
+  --color-on-accent: oklch(var(--t-l-on-accent) var(--c-surface) var(--h-surface));
+  --color-focus: var(--color-accent);
+
+  /* テーマが切り替わったときに、色だけをなめらかに移す */
+  --dur-theme: 420ms;
+}
+
+/* 季節・時間帯が変わったときの色の移り変わり。
+   動きを減らす設定のときは即座に切り替える。 */
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  .site-header,
+  .site-footer {
+    transition:
+      background-color var(--dur-theme) var(--ease-out),
+      color var(--dur-theme) var(--ease-out),
+      border-color var(--dur-theme) var(--ease-out);
+  }
 }

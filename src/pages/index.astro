@@ -20,9 +20,12 @@ const picks = featuredWorks(3);
   <!-- カテゴリ案内。カテゴリが2つ以上あるときだけ出す -->
   {
     activeCategories.length > 1 && (
-      <section class="section">
+      <section class="section" data-reveal>
         <div class="container">
-          <h2 class="section__title">制作の分野</h2>
+          <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">制作の分野</h2>
+      </div>
           <ul class="categories">
             {activeCategories.map((category) => (
               <li>
@@ -39,9 +42,12 @@ const picks = featuredWorks(3);
   }
 
   <!-- 作品の簡易一覧 -->
-  <section class="section">
+  <section class="section" data-reveal>
     <div class="container">
-      <h2 class="section__title">制作したもの</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">制作したもの</h2>
+      </div>
       <p class="section__lead">
         現在ポートフォリオを制作中です。準備ができ次第、順次掲載していきます。
       </p>
@@ -61,9 +67,12 @@ const picks = featuredWorks(3);
   </section>
 
   <!-- 制作にあたって -->
-  <section class="section">
+  <section class="section" data-reveal>
     <div class="container">
-      <h2 class="section__title">制作にあたって</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">制作にあたって</h2>
+      </div>
       <div class="prose">
         {profile.closing.map((paragraph) => <p>{paragraph}</p>)}
       </div>
@@ -71,9 +80,12 @@ const picks = featuredWorks(3);
   </section>
 
   <!-- 稼働について -->
-  <section class="section">
+  <section class="section" data-reveal>
     <div class="container">
-      <h2 class="section__title">稼働について</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">稼働について</h2>
+      </div>
       <dl class="deflist">
         {
           profile.workStyle.map((item) => (
@@ -88,9 +100,12 @@ const picks = featuredWorks(3);
   </section>
 
   <!-- ご依頼窓口 -->
-  <section class="section" id="contact">
+  <section class="section" id="contact" data-reveal>
     <div class="container">
-      <h2 class="section__title">ご依頼・ご相談</h2>
+      <div class="section__head">
+        <p class="section__num" aria-hidden="true"></p>
+        <h2 class="section__title">ご依頼・ご相談</h2>
+      </div>
       <p class="section__lead">
         下記いずれかのサービスからご連絡ください。まだイメージが固まっていない段階でも構いません。
       </p>

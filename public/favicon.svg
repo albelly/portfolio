@@ -1,4 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#1f4f8b"/>
-  <path d="M9 21.5V10.5h3.1l3.9 7.2 3.9-7.2H23v11h-2.6v-6.6l-3.2 5.9h-1.4l-3.2-5.9v6.6z" fill="#fff"/>
+  <!-- 朱の角印。角をわずかに欠けさせて押した印らしくしている -->
+  <rect x="1" y="1" width="30" height="30" rx="2" ry="3" fill="#af2f09"/>
+  <text x="16" y="23" text-anchor="middle"
+        font-family="'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',serif"
+        font-size="21" font-weight="600" fill="#faf6f3">く</text>
 </svg>

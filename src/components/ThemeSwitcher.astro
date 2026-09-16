@@ -1,0 +1,328 @@
+---
+/**
+ * 季節・時間帯の切替ボタン（画面右下・固定）。
+ *
+ * 既定ではアクセスした時点の季節と時刻に合わせて表示される。
+ * ここから任意の組み合わせに変更でき、選択は localStorage に保存される。
+ *
+ * テーマの確定そのものは BaseLayout の head 内スクリプトが行う（ちらつき防止）。
+ * このコンポーネントは「切り替える操作」と「いま何のテーマか」の表示を担う。
+ */
+import { seasons, timeBands, themeLabels, STORAGE_KEY } from '../config/theme';
+---
+
+<div class="switcher" id="theme-switcher">
+  <button
+    class="switcher__button"
+    id="theme-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="theme-panel"
+  >
+    <span class="switcher__seal" aria-hidden="true"></span>
+    <span class="switcher__current" id="theme-current-label">秋の日中</span>
+    <span class="visually-hidden">の配色です。押すと季節と時間帯を選べます</span>
+  </button>
+
+  <div class="switcher__panel" id="theme-panel" hidden>
+    <p class="switcher__lead">
+      季節と時間帯で配色が変わります。<br />
+      いまの時刻に合わせて自動で切り替わります。
+    </p>
+
+    <fieldset class="switcher__group">
+      <legend class="switcher__legend">季節</legend>
+      <div class="switcher__row">
+        {
+          seasons.map((s) => (
+            <button
+              class="switcher__option"
+              type="button"
+              data-season-set={s.id}
+              aria-pressed="false"
+            >
+              <span class="switcher__option-label">{s.label}</span>
+              <span class="switcher__option-note">{s.accentName}</span>
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="switcher__group">
+      <legend class="switcher__legend">時間帯</legend>
+      <div class="switcher__row">
+        {
+          timeBands.map((t) => (
+            <button class="switcher__option" type="button" data-time-set={t.id} aria-pressed="false">
+              <span class="switcher__option-label">{t.label}</span>
+              <span class="switcher__option-note">{t.hours}</span>
+            </button>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <button class="switcher__reset" id="theme-reset" type="button">いまの時刻に合わせる</button>
+  </div>
+</div>
+
+<style>
+  .switcher {
+    position: fixed;
+    right: var(--gutter);
+    bottom: var(--space-md);
+    z-index: 60;
+  }
+
+  /* ---------------- 押しボタン ---------------- */
+  .switcher__button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-sm);
+    border: var(--rule-width) solid var(--color-rule-strong);
+    border-radius: var(--radius);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-theme) var(--ease-out);
+  }
+
+  .switcher__button:hover {
+    border-color: var(--color-accent);
+  }
+
+  .switcher__button:active {
+    background: var(--color-accent-soft);
+  }
+
+  /* 朱の小さな印。差し色の使いどころをここに限定する */
+  .switcher__seal {
+    width: 0.6rem;
+    height: 0.6rem;
+    background: var(--color-accent);
+    transition: background-color var(--dur-theme) var(--ease-out);
+  }
+
+  .switcher__current {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  /* ---------------- 開くパネル ---------------- */
+  .switcher__panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + var(--space-xs));
+    width: max(16rem, min(20rem, calc(100vw - var(--gutter) * 2)));
+    padding: var(--space-md);
+    border: var(--rule-width) solid var(--color-rule-strong);
+    border-radius: var(--radius);
+    background: var(--color-paper);
+  }
+
+  .switcher__panel[hidden] {
+    display: none;
+  }
+
+  .switcher__lead {
+    font-size: var(--text-xs);
+    line-height: 1.8;
+    color: var(--color-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .switcher__group {
+    border: 0;
+    padding: 0;
+    margin: 0 0 var(--space-md);
+  }
+
+  .switcher__legend {
+    padding: 0;
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-neutral);
+    letter-spacing: var(--tracking-label);
+    margin-bottom: var(--space-xs);
+  }
+
+  .switcher__row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2xs);
+  }
+
+  .switcher__option {
+    display: grid;
+    gap: 1px;
+    padding: var(--space-xs) var(--space-2xs);
+    border: var(--rule-width) solid var(--color-rule);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .switcher__option:hover {
+    border-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  /* 選択中。差し色は枠線と文字だけに置く */
+  .switcher__option[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+
+  .switcher__option-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .switcher__option-note {
+    font-size: var(--text-2xs);
+    color: var(--color-neutral);
+    white-space: nowrap;
+  }
+
+  .switcher__reset {
+    width: 100%;
+    padding: var(--space-xs);
+    border: var(--rule-width) solid var(--color-rule);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .switcher__reset:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .switcher__reset:active {
+    background: var(--color-accent-soft);
+  }
+
+  .switcher__option:disabled,
+  .switcher__reset:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* JavaScript が無効な環境では操作できないので出さない */
+  :global(html.no-js) .switcher {
+    display: none;
+  }
+</style>
+
+<script define:vars={{ labels: themeLabels, key: STORAGE_KEY }}>
+  const root = document.documentElement;
+  const wrap = document.getElementById('theme-switcher');
+  const toggle = document.getElementById('theme-toggle');
+  const panel = document.getElementById('theme-panel');
+  const current = document.getElementById('theme-current-label');
+  const reset = document.getElementById('theme-reset');
+  const headerLabel = document.getElementById('theme-header-label');
+
+  if (wrap && toggle && panel && current) {
+    const seasonButtons = panel.querySelectorAll('[data-season-set]');
+    const timeButtons = panel.querySelectorAll('[data-time-set]');
+
+    /** いまの季節・時間帯を時計から求める（head のスクリプトと同じ規則） */
+    const fromClock = () => {
+      const d = new Date();
+      const m = d.getMonth() + 1;
+      const h = d.getHours();
+      return {
+        season: m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : m <= 8 ? 'summer' : 'autumn',
+        time: h < 5 ? 'night' : h < 9 ? 'dawn' : h < 17 ? 'day' : h < 19 ? 'dusk' : 'night',
+      };
+    };
+
+    const render = () => {
+      const s = root.dataset.season;
+      const t = root.dataset.time;
+      const name = `${labels.seasons[s] ?? ''}の${labels.times[t] ?? ''}`;
+      current.textContent = name;
+      if (headerLabel) headerLabel.textContent = name;
+      seasonButtons.forEach((b) =>
+        b.setAttribute('aria-pressed', String(b.dataset.seasonSet === s)),
+      );
+      timeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.timeSet === t)));
+    };
+
+    const save = () => {
+      try {
+        localStorage.setItem(key, `${root.dataset.season}/${root.dataset.time}`);
+      } catch (e) {
+        /* 保存できない環境でも、そのページの間は切り替わる */
+      }
+    };
+
+    const setOpen = (open) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      panel.hidden = !open;
+    };
+
+    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+
+    seasonButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        root.dataset.season = b.dataset.seasonSet;
+        save();
+        render();
+      }),
+    );
+
+    timeButtons.forEach((b) =>
+      b.addEventListener('click', () => {
+        root.dataset.time = b.dataset.timeSet;
+        save();
+        render();
+      }),
+    );
+
+    if (reset) {
+      reset.addEventListener('click', () => {
+        const now = fromClock();
+        root.dataset.season = now.season;
+        root.dataset.time = now.time;
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          /* 何もしない */
+        }
+        render();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) setOpen(false);
+    });
+
+    render();
+  }
+</script>

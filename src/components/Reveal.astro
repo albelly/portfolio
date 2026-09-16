@@ -1,0 +1,56 @@
+---
+/**
+ * スクロールで要素をふわっと現れさせる。
+ *
+ * data-reveal を付けた要素を IntersectionObserver で監視し、
+ * 画面に入ったら is-revealed を付けるだけ。ライブラリは使わない。
+ *
+ * 【中身が見えなくなることは絶対に避ける】
+ *  - JavaScript が無効なとき   … CSS 側の html.no-js で最初から表示
+ *  - 動きを減らす設定のとき     … CSS 側の prefers-reduced-motion で最初から表示
+ *  - 監視の仕組みが使えないとき … 下の catch で全て表示に切り替える
+ */
+---
+
+<script>
+  const targets = document.querySelectorAll('[data-reveal]');
+
+  /** 何かあったときは、とにかく全部表示する */
+  const revealAll = () => targets.forEach((el) => el.classList.add('is-revealed'));
+
+  try {
+    // 画面に面積が無い環境（埋め込み枠が潰れている等）では、
+    // 監視が一度も発火せず中身が消えたままになるため、先に全部表示する
+    if (!('IntersectionObserver' in window) || !window.innerHeight || !window.innerWidth) {
+      revealAll();
+    } else {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-revealed');
+            // 一度現れたら監視をやめる。戻ったときに消えないようにするため
+            observer.unobserve(entry.target);
+          });
+        },
+        // 少し画面に入ってから動かす
+        { rootMargin: '0px 0px -8% 0px', threshold: 0 },
+      );
+
+      targets.forEach((el) => observer.observe(el));
+
+      // 安全網。何らかの理由で監視が働かなかった場合に備え、
+      // 少し待ってから、画面の近くにある要素は表示してしまう。
+      window.setTimeout(() => {
+        targets.forEach((el) => {
+          if (el.classList.contains('is-revealed')) return;
+          if (el.getBoundingClientRect().top < window.innerHeight * 2) {
+            el.classList.add('is-revealed');
+          }
+        });
+      }, 4000);
+    }
+  } catch (e) {
+    revealAll();
+  }
+</script>
