@@ -2,7 +2,7 @@
  * 季節のモチーフ。
  *
  * 季節は色ではなく、自然のモチーフで表す。
- *   春 … 桜の花びらが舞う ＋ 右上に桜の枝
+ *   春 … 桜の花びらが舞う ＋ 右上に桜の枝 ＋ 左下に若草 ＋ 画面下部に花びらの吹き溜まり
  *   夏 … 左上から右下へ差し込む光芒と光の粒 ＋ 右上に風鈴
  *   秋 … 紅葉が舞う ＋ 右上に紅葉の枝 ＋ 左下にすすき ＋ 画面下部に落ち葉
  *   冬 … 雪が降る ＋ 右上に雪をかぶった枝 ＋ 角に霜 ＋ 画面下部に積雪
@@ -180,8 +180,8 @@
   max-height: 130vh;
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--fx-ray), transparent 72%);
-  filter: blur(28px);
-  opacity: calc(var(--fx-o) * 0.7);
+  filter: blur(36px);
+  opacity: calc(var(--fx-o) * var(--fx-light-o) * 0.3);
   animation: fx-glow 11s ease-in-out infinite alternate;
   will-change: opacity;
 }
@@ -199,7 +199,8 @@
   transform: rotate(var(--tilt));
   transform-origin: 50% 0;
   filter: blur(var(--blur));
-  opacity: calc(var(--fx-o) * var(--o) * 0.7);
+  /* 下の文字が透けて読める薄さに留める。光っぽさはぼかしで出す */
+  opacity: calc(var(--fx-o) * var(--fx-light-o) * var(--o) * 0.34);
   animation: fx-ray var(--dur) ease-in-out var(--delay) infinite alternate;
   will-change: opacity;
 }
@@ -212,7 +213,7 @@
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
-  background-color: var(--fx-ray);
+  background-color: var(--fx-mote);
   filter: blur(var(--blur));
   opacity: 0;
   animation: fx-mote var(--dur) linear var(--delay) infinite;
@@ -263,19 +264,23 @@
   width: clamp(7rem, 16vw, 12rem);
 }
 
-/* 画面下部（落ち葉・積雪） */
+/* 画面下部（花びらの吹き溜まり・落ち葉・積雪）。
+   複数の SVG を重ねられるよう、高さは親が持ち、SVG は敷き詰める */
 .fx__ground {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
+  height: clamp(3.5rem, 9vh, 6rem);
   opacity: var(--fx-o);
 }
 
 .fx__ground svg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: clamp(3.5rem, 9vh, 6rem);
+  height: 100%;
 }
 
 /* ------------------------------------------------------------------
@@ -357,19 +362,19 @@
 /* 光芒。射し込む強さがゆっくり変わる */
 @keyframes fx-ray {
   from {
-    opacity: calc(var(--fx-o) * var(--o) * 0.5);
+    opacity: calc(var(--fx-o) * var(--fx-light-o) * var(--o) * 0.22);
   }
   to {
-    opacity: calc(var(--fx-o) * var(--o) * 1);
+    opacity: calc(var(--fx-o) * var(--fx-light-o) * var(--o) * 0.42);
   }
 }
 
 @keyframes fx-glow {
   from {
-    opacity: calc(var(--fx-o) * 0.5);
+    opacity: calc(var(--fx-o) * var(--fx-light-o) * 0.22);
   }
   to {
-    opacity: calc(var(--fx-o) * 0.85);
+    opacity: calc(var(--fx-o) * var(--fx-light-o) * 0.38);
   }
 }
 

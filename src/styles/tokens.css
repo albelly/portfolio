@@ -175,10 +175,16 @@
   --fx-leaf-b: oklch(var(--fx-l) 0.14 55); /* 紅葉 橙 */
   --fx-leaf-c: oklch(calc(var(--fx-l) + 8%) 0.12 85); /* 紅葉 黄 */
   --fx-snow: oklch(var(--fx-l-pale) 0.015 250); /* 雪 */
-  /* 光芒。淡い色だと明るい紙の上で見えないため、はっきり金色に振っている */
-  --fx-ray: oklch(var(--fx-l-pale) 0.135 88);
+  /* 光芒。色で光らせず、紙と同じかそれより明るい淡い色を薄く重ね、ぼかしで光らせる。
+     明るい紙の上では光は紙に溶け、上部の空に当たる部分だけが筋として見える。
+     明度と強さは時間帯ごとに seasons.css で決める（夜は月明かりとして暗く弱く）。 */
+  --fx-ray-l: 96%;
+  --fx-light-o: 1;
+  --fx-ray: oklch(var(--fx-ray-l) 0.055 88);
+  --fx-mote: oklch(var(--fx-l-pale) 0.09 88); /* 光の粒。小さいので少し濃くてよい */
   --fx-glass: oklch(var(--fx-l-pale) 0.03 215); /* 風鈴の硝子 */
   --fx-plume: oklch(var(--fx-l-pale) 0.05 85); /* すすきの穂 */
+  --fx-grass: oklch(var(--fx-l) 0.07 140); /* 春の若草 */
 
   /* テーマが切り替わったときに、色だけをなめらかに移す */
   --dur-theme: 420ms;
