@@ -178,6 +178,7 @@
   /* 光芒。淡い色だと明るい紙の上で見えないため、はっきり金色に振っている */
   --fx-ray: oklch(var(--fx-l-pale) 0.135 88);
   --fx-glass: oklch(var(--fx-l-pale) 0.03 215); /* 風鈴の硝子 */
+  --fx-plume: oklch(var(--fx-l-pale) 0.05 85); /* すすきの穂 */
 
   /* テーマが切り替わったときに、色だけをなめらかに移す */
   --dur-theme: 420ms;

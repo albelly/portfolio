@@ -3,13 +3,13 @@
  *
  * 季節は色ではなく、自然のモチーフで表す。
  *   春 … 桜の花びらが舞う ＋ 右上に桜の枝
- *   夏 … 左上から差し込む光芒 ＋ 漂う光の粒 ＋ 右上に風鈴
- *   秋 … 紅葉が舞う ＋ 画面下部に落ち葉
- *   冬 … 雪が降る ＋ 画面下部に積雪
+ *   夏 … 左上から右下へ差し込む光芒と光の粒 ＋ 右上に風鈴
+ *   秋 … 紅葉が舞う ＋ 右上に紅葉の枝 ＋ 左下にすすき ＋ 画面下部に落ち葉
+ *   冬 … 雪が降る ＋ 右上に雪をかぶった枝 ＋ 角に霜 ＋ 画面下部に積雪
  *
  * 【作り方】
- *  外部の画像素材は使わない。形は mask-image のデータURI で1回だけ定義し、
- *  色は background-color なので時間帯のテーマに自動で追従する。
+ *  外部の画像素材は使わない。形は mask-image のデータURI と SVG で自作し、
+ *  色は CSS 変数なので時間帯のテーマに自動で追従する。
  *
  * 【負荷対策】
  *  - 粒子ひとつにつき要素1つ・アニメーション1つ
@@ -25,6 +25,7 @@
  *  速さ      … 同ファイルの dur の範囲
  *  濃さ      … seasons.css の --fx-o
  *  色の明るさ … seasons.css の --fx-l / --fx-l-pale
+ *  光芒の強さ … 下の @keyframes fx-ray / fx-glow
  */
 
 /* ------------------------------------------------------------------
@@ -107,8 +108,15 @@
   background-color: var(--fx-leaf-c);
 }
 
+/* すすき。根元を軸に、穂がゆっくり揺れる */
+.fx__stalk {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fx-sway-soft 6s ease-in-out infinite alternate;
+}
+
 /* ------------------------------------------------------------------
- * 冬 ― 雪
+ * 冬 ― 雪と霜
  * ------------------------------------------------------------------ */
 .fx__snow {
   background-color: var(--fx-snow);
@@ -117,39 +125,118 @@
   animation-timing-function: ease-in-out;
 }
 
+/* 窓の霜。角に置き、開いたときに結晶がゆっくり伸びる */
+.fx__frost {
+  position: absolute;
+  width: clamp(7rem, 16vw, 13rem);
+  opacity: calc(var(--fx-o) * 0.8);
+}
+
+.fx__frost svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fx__frost--tl {
+  top: 0;
+  left: 0;
+}
+
+.fx__frost--br {
+  right: 0;
+  bottom: 0;
+  transform: rotate(180deg);
+}
+
+.fx__frost path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: fx-frost 3.2s var(--ease-out) 0.4s forwards;
+}
+
+.fx__frost--br path {
+  animation-delay: 1s;
+}
+
 /* ------------------------------------------------------------------
  * 夏 ― 光芒と光の粒
+ *
+ * 光源は画面の左上。そこから右下へ、扇状に光の筋が伸びる。
+ * CSS の rotate は正の角度で下端が左へ振れるため、負の角度を使っている。
  * ------------------------------------------------------------------ */
+.fx__light {
+  position: absolute;
+  inset: 0;
+}
+
+/* 光源のにじみ */
+.fx__glow {
+  position: absolute;
+  top: -34vh;
+  left: -26vw;
+  width: 88vw;
+  height: 88vw;
+  max-height: 130vh;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--fx-ray), transparent 72%);
+  filter: blur(28px);
+  opacity: calc(var(--fx-o) * 0.7);
+  animation: fx-glow 11s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+
+/* 光の筋。長さ方向に減衰し、両縁をマスクで溶かして、さらにぼかす */
 .fx__ray {
   position: absolute;
-  top: -50vh;
+  top: -16vh;
   left: var(--x);
   width: var(--size);
-  height: 190vh;
-  background: linear-gradient(to bottom, var(--fx-ray), transparent 78%);
-  opacity: calc(var(--fx-o) * 0.7);
+  height: 210vh;
+  background: linear-gradient(to bottom, var(--fx-ray) 0%, var(--fx-ray) 12%, transparent 82%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 32%, #000 68%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 32%, #000 68%, transparent);
   transform: rotate(var(--tilt));
-  transform-origin: top center;
-  filter: blur(4px);
+  transform-origin: 50% 0;
+  filter: blur(var(--blur));
+  opacity: calc(var(--fx-o) * var(--o) * 0.7);
   animation: fx-ray var(--dur) ease-in-out var(--delay) infinite alternate;
   will-change: opacity;
 }
 
+/* 空気中の光の粒。光の向きに沿って漂い、明滅する */
 .fx__mote {
-  background-color: var(--fx-ray);
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
   border-radius: 50%;
-  top: auto;
-  bottom: -5vh;
-  filter: blur(1px);
-  animation-name: fx-mote;
-  animation-timing-function: ease-in-out;
+  background-color: var(--fx-ray);
+  filter: blur(var(--blur));
+  opacity: 0;
+  animation: fx-mote var(--dur) linear var(--delay) infinite;
+  will-change: transform;
+}
+
+/* 風鈴。全体がごくわずかに、短冊はもう少し大きく揺れる */
+.fx__furin {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: fx-sway-faint 6.5s ease-in-out infinite alternate;
+}
+
+.fx__tanzaku {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: fx-swing 4.2s ease-in-out -1.4s infinite alternate;
 }
 
 /* ------------------------------------------------------------------
  * 隅の演出
  * ------------------------------------------------------------------ */
 
-/* 右上（桜の枝・風鈴） */
+/* 右上（桜の枝・風鈴・紅葉の枝・雪の枝） */
 .fx__corner {
   position: absolute;
   top: 0;
@@ -162,6 +249,18 @@
   display: block;
   width: clamp(9rem, 22vw, 17rem);
   height: auto;
+}
+
+/* 左下（すすき） */
+.fx__corner--bl {
+  top: auto;
+  right: auto;
+  bottom: 0;
+  left: 0;
+}
+
+.fx__corner--bl svg {
+  width: clamp(7rem, 16vw, 12rem);
 }
 
 /* 画面下部（落ち葉・積雪） */
@@ -177,12 +276,6 @@
   display: block;
   width: 100%;
   height: clamp(3.5rem, 9vh, 6rem);
-}
-
-/* 風鈴の短冊。ゆっくり揺れる */
-.fx__tanzaku {
-  transform-origin: 50% 0;
-  animation: fx-swing 4.2s ease-in-out infinite alternate;
 }
 
 /* ------------------------------------------------------------------
@@ -237,20 +330,26 @@
   }
 }
 
-/* 光の粒。ゆっくり浮かび上がる */
+/* 光の粒。左上から右下へ流れながら、明滅する */
 @keyframes fx-mote {
   0% {
     transform: translate3d(0, 0, 0);
     opacity: 0;
   }
-  22% {
-    opacity: calc(var(--fx-o) * 0.75);
+  15% {
+    opacity: var(--fx-o);
   }
-  78% {
-    opacity: calc(var(--fx-o) * 0.75);
+  35% {
+    opacity: calc(var(--fx-o) * 0.3);
+  }
+  55% {
+    opacity: var(--fx-o);
+  }
+  75% {
+    opacity: calc(var(--fx-o) * 0.4);
   }
   100% {
-    transform: translate3d(var(--sway), -78vh, 0);
+    transform: translate3d(var(--dx), var(--dy), 0);
     opacity: 0;
   }
 }
@@ -258,20 +357,56 @@
 /* 光芒。射し込む強さがゆっくり変わる */
 @keyframes fx-ray {
   from {
-    opacity: calc(var(--fx-o) * 0.45);
+    opacity: calc(var(--fx-o) * var(--o) * 0.5);
   }
   to {
-    opacity: calc(var(--fx-o) * 0.92);
+    opacity: calc(var(--fx-o) * var(--o) * 1);
+  }
+}
+
+@keyframes fx-glow {
+  from {
+    opacity: calc(var(--fx-o) * 0.5);
+  }
+  to {
+    opacity: calc(var(--fx-o) * 0.85);
   }
 }
 
 /* 風鈴の短冊 */
 @keyframes fx-swing {
   from {
-    transform: rotate(-7deg);
+    transform: rotate(-6deg);
   }
   to {
-    transform: rotate(7deg);
+    transform: rotate(6deg);
+  }
+}
+
+/* 風鈴の器。ほとんど気づかない程度に */
+@keyframes fx-sway-faint {
+  from {
+    transform: rotate(-1.5deg);
+  }
+  to {
+    transform: rotate(1.5deg);
+  }
+}
+
+/* すすき */
+@keyframes fx-sway-soft {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3.5deg);
+  }
+}
+
+/* 霜。線が端から伸びていく */
+@keyframes fx-frost {
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
@@ -285,8 +420,14 @@
   }
 
   .fx__corner *,
-  .fx__ground * {
+  .fx__ground *,
+  .fx__frost * {
     animation: none !important;
+  }
+
+  /* 霜は伸ばさず、最初から描いておく */
+  .fx__frost path {
+    stroke-dashoffset: 0;
   }
 }
 

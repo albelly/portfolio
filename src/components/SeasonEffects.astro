@@ -6,7 +6,7 @@
  * こうすると切り替えが即座で、動くのは表示中の季節の分だけになる。
  *
  * 位置・速度・大きさ・揺れ幅は、固定の種から作った乱数でビルド時に決める。
- * 実行時の JavaScript は使わない。
+ * 実行時の JavaScript は使わない。図版はすべて SVG / CSS の自作で、外部素材は無い。
  *
  * 【強さの調整はここ】
  *   COUNTS … 枚数・粒数
@@ -26,14 +26,15 @@ function makeRng(seed: number) {
 
 const rng = makeRng(20260916);
 const pick = (min: number, max: number) => min + rng() * (max - min);
+const f = (n: number, d = 1) => n.toFixed(d);
 
 /* --- 強さの設定 --- */
 const COUNTS = {
   petal: 30, // 桜の花びら
   leaf: 26, // 紅葉
   snow: 50, // 雪
-  ray: 4, // 光芒
-  mote: 14, // 光の粒
+  ray: 6, // 光芒
+  mote: 28, // 空気中の光の粒
 };
 
 type Bit = { style: string; cls?: string };
@@ -42,14 +43,13 @@ type Bit = { style: string; cls?: string };
 function makeFalling(n: number, sizeMin: number, sizeMax: number, durMin: number, durMax: number) {
   const bits: Bit[] = [];
   for (let i = 0; i < n; i++) {
-    const size = pick(sizeMin, sizeMax);
     bits.push({
       style: [
-        `--x:${pick(-4, 100).toFixed(2)}%`,
-        `--size:${size.toFixed(1)}px`,
-        `--dur:${pick(durMin, durMax).toFixed(2)}s`,
-        `--delay:${(-pick(0, durMax)).toFixed(2)}s`,
-        `--sway:${pick(20, 90).toFixed(0)}px`,
+        `--x:${f(pick(-4, 100), 2)}%`,
+        `--size:${f(pick(sizeMin, sizeMax))}px`,
+        `--dur:${f(pick(durMin, durMax), 2)}s`,
+        `--delay:${f(-pick(0, durMax), 2)}s`,
+        `--sway:${f(pick(20, 90), 0)}px`,
       ].join(';'),
     });
   }
@@ -66,25 +66,79 @@ const leaves = makeFalling(COUNTS.leaf, 13, 26, 10, 19).map((b, i) => ({
 
 const snow = makeFalling(COUNTS.snow, 3, 8, 9, 20);
 
-const rays = Array.from({ length: COUNTS.ray }, (_, i) => ({
+/* 光芒。左上のひとつの光源から、右下へ扇状に広がる */
+const rays = Array.from({ length: COUNTS.ray }, (_, i) => {
+  const t = i / (COUNTS.ray - 1);
+  return {
+    style: [
+      `--x:${f(-4 + t * 9 + pick(-2, 2))}vw`,
+      `--size:${f(pick(3, 14))}vw`,
+      `--tilt:${f(-(24 + t * 36) + pick(-3, 3))}deg`,
+      `--blur:${f(pick(8, 20), 0)}px`,
+      `--o:${f(pick(0.45, 1), 2)}`,
+      `--dur:${f(pick(7, 14), 2)}s`,
+      `--delay:${f(-pick(0, 8), 2)}s`,
+    ].join(';'),
+  };
+});
+
+/* 光の粒。光の向きに沿って、左上から右下へゆっくり漂う */
+const motes = Array.from({ length: COUNTS.mote }, () => ({
   style: [
-    `--x:${(-16 + i * 13).toFixed(0)}vw`,
-    `--size:${pick(5, 11).toFixed(1)}vw`,
-    `--tilt:${pick(18, 27).toFixed(1)}deg`,
-    `--dur:${pick(7, 13).toFixed(2)}s`,
-    `--delay:${(-pick(0, 6)).toFixed(2)}s`,
+    `--x:${f(pick(-5, 55))}vw`,
+    `--y:${f(pick(-5, 45))}vh`,
+    `--size:${f(pick(1.5, 5))}px`,
+    `--dx:${f(pick(18, 55), 0)}vw`,
+    `--dy:${f(pick(25, 70), 0)}vh`,
+    `--blur:${f(pick(0, 1.6))}px`,
+    `--dur:${f(pick(18, 34))}s`,
+    `--delay:${f(-pick(0, 30))}s`,
   ].join(';'),
 }));
 
-const motes = Array.from({ length: COUNTS.mote }, () => ({
-  style: [
-    `--x:${pick(0, 100).toFixed(2)}%`,
-    `--size:${pick(3, 7).toFixed(1)}px`,
-    `--dur:${pick(16, 30).toFixed(2)}s`,
-    `--delay:${(-pick(0, 24)).toFixed(2)}s`,
-    `--sway:${pick(-70, 70).toFixed(0)}px`,
-  ].join(';'),
-}));
+/* 紅葉の形。舞う葉・枝の葉・落ち葉で共通 */
+const MAPLE =
+  'M50 2l8 22 18-8-6 20h22L76 52l12 18-22-6-2 24-14-16-14 16-2-24-22 6 12-18L8 36h22l-6-20 18 8z';
+
+/* 秋の枝につける葉。[x, y, 大きさ, 回転, 色] */
+const autumnLeaves: [number, number, number, number, string][] = [
+  [236, 20, 17, -20, 'a'],
+  [204, 42, 15, 30, 'b'],
+  [206, 90, 13, 10, 'c'],
+  [166, 76, 16, -35, 'a'],
+  [126, 86, 14, 20, 'b'],
+  [92, 98, 12, -10, 'c'],
+  [150, 112, 10, 50, 'a'],
+];
+
+/* 霜の結晶。角から3本の主軸を伸ばし、それぞれに枝を付ける */
+function frostPath() {
+  const parts: string[] = [];
+  for (const deg of [22, 45, 68]) {
+    const len = deg === 45 ? 150 : 115;
+    const a = (deg * Math.PI) / 180;
+    parts.push(`M0 0L${f(Math.cos(a) * len)} ${f(Math.sin(a) * len)}`);
+    for (let d = 22; d < len - 10; d += 18) {
+      const bx = Math.cos(a) * d;
+      const by = Math.sin(a) * d;
+      const bl = (len - d) * 0.32;
+      for (const side of [-1, 1]) {
+        const b = a + (side * Math.PI) / 3;
+        parts.push(`M${f(bx)} ${f(by)}l${f(Math.cos(b) * bl)} ${f(Math.sin(b) * bl)}`);
+      }
+    }
+  }
+  return parts.join(' ');
+}
+const FROST = frostPath();
+
+/* すすき。[根元x, 穂先x, 穂先y, 揺れの周期, 遅れ] */
+const stalks: [number, number, number, string, string][] = [
+  [42, 56, 78, '5.6s', '-1.2s'],
+  [86, 92, 58, '6.4s', '-3.1s'],
+  [128, 118, 92, '5.1s', '-0.4s'],
+  [170, 186, 70, '6.9s', '-2.2s'],
+];
 ---
 
 <div class="fx" aria-hidden="true">
@@ -135,38 +189,118 @@ const motes = Array.from({ length: COUNTS.mote }, () => ({
   {/* ---------------- 夏 ― 光芒と風鈴 ---------------- */}
   <div class="fx__season fx__season--summer">
     <div class="fx__field">
-      {rays.map((r) => <span class="fx__ray" style={r.style} />)}
-      {motes.map((m) => <span class="fx__bit fx__mote" style={m.style} />)}
+      {/* 左上の光源。ここから右下へ光が広がる */}
+      <div class="fx__light">
+        <span class="fx__glow"></span>
+        {rays.map((r) => <span class="fx__ray" style={r.style} />)}
+      </div>
+      {motes.map((m) => <span class="fx__mote" style={m.style} />)}
     </div>
 
     {/* 右上の風鈴 */}
     <div class="fx__corner">
-      <svg viewBox="0 0 200 230" fill="none">
-        <path d="M150 0v44" stroke="currentColor" stroke-width="2.5" opacity="0.5"></path>
-        {/* 硝子の笠 */}
-        <path
-          d="M114 96c0-20 16-36 36-36s36 16 36 36v10c0 4-3 7-7 7h-58c-4 0-7-3-7-7z"
-          fill="var(--fx-glass)"
-          opacity="0.75"></path>
-        <path
-          d="M114 96c0-20 16-36 36-36s36 16 36 36v10c0 4-3 7-7 7h-58c-4 0-7-3-7-7z"
-          stroke="currentColor"
-          stroke-width="2"
-          opacity="0.5"></path>
-        <path d="M128 78c2-9 9-15 17-17" stroke="var(--color-paper)" stroke-width="3" opacity="0.7"
-        ></path>
-        {/* 舌と短冊 */}
-        <g class="fx__tanzaku">
-          <path d="M150 113v22" stroke="currentColor" stroke-width="2" opacity="0.5"></path>
-          <rect
-            x="140"
-            y="135"
-            width="20"
-            height="62"
-            rx="2"
-            fill="var(--color-accent)"
-            opacity="0.85"></rect>
-          <path d="M150 197v20" stroke="currentColor" stroke-width="1.6" opacity="0.4"></path>
+      <svg viewBox="0 0 200 260" fill="none">
+        <defs>
+          {/* 硝子の器。左上に光が当たり、奥が薄く透ける */}
+          <radialGradient id="fx-glass-body" cx="36%" cy="26%" r="78%">
+            <stop offset="0" style="stop-color: var(--color-paper); stop-opacity: 0.95"></stop>
+            <stop offset="0.42" style="stop-color: var(--fx-glass); stop-opacity: 0.55"></stop>
+            <stop offset="1" style="stop-color: var(--fx-glass); stop-opacity: 0.22"></stop>
+          </radialGradient>
+          <linearGradient id="fx-tanzaku" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" style="stop-color: var(--color-accent); stop-opacity: 0.78"></stop>
+            <stop offset="0.5" style="stop-color: var(--color-accent); stop-opacity: 0.95"></stop>
+            <stop offset="1" style="stop-color: var(--color-accent); stop-opacity: 0.7"></stop>
+          </linearGradient>
+        </defs>
+
+        <g class="fx__furin">
+          {/* 吊り紐 */}
+          <circle cx="150" cy="6" r="4" stroke="currentColor" stroke-width="1.6" opacity="0.5"
+          ></circle>
+          <path d="M150 10v36" stroke="currentColor" stroke-width="1.4" opacity="0.5"></path>
+
+          {/* 器の本体。釣鐘形で、口がわずかに開く */}
+          <path
+            d="M150 46c-24 0-42 18-42 46 0 16 6 28 12 36 2 3 5 5 9 5h42c4 0 7-2 9-5 6-8 12-20 12-36 0-28-18-46-42-46z"
+            fill="url(#fx-glass-body)"></path>
+          {/* 向こう側の壁。透けて見える */}
+          <path
+            d="M122 118c8 5 18 8 28 8s20-3 28-8"
+            stroke="var(--fx-glass)"
+            stroke-width="5"
+            stroke-linecap="round"
+            opacity="0.4"></path>
+          {/* 輪郭 */}
+          <path
+            d="M150 46c-24 0-42 18-42 46 0 16 6 28 12 36 2 3 5 5 9 5h42c4 0 7-2 9-5 6-8 12-20 12-36 0-28-18-46-42-46z"
+            stroke="currentColor"
+            stroke-width="1.4"
+            opacity="0.42"></path>
+          {/* 口 */}
+          <ellipse cx="150" cy="133" rx="31" ry="6" fill="var(--fx-glass)" opacity="0.3"
+          ></ellipse>
+          <ellipse
+            cx="150"
+            cy="133"
+            rx="31"
+            ry="6"
+            stroke="currentColor"
+            stroke-width="1.4"
+            opacity="0.5"></ellipse>
+          {/* 反射。強い光と弱い光 */}
+          <path
+            d="M124 96c0-16 8-30 20-38"
+            stroke="var(--color-paper)"
+            stroke-width="4.5"
+            stroke-linecap="round"
+            opacity="0.9"></path>
+          <path
+            d="M120 108c0 5 1 10 3 14"
+            stroke="var(--color-paper)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            opacity="0.55"></path>
+          <path
+            d="M178 74c3 5 5 11 6 18"
+            stroke="var(--color-paper)"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity="0.45"></path>
+
+          {/* 舌（ぜつ）。硝子玉を糸で吊る */}
+          <path d="M150 88v42" stroke="currentColor" stroke-width="0.9" opacity="0.4"></path>
+          <circle
+            cx="150"
+            cy="134"
+            r="4.5"
+            fill="var(--fx-glass)"
+            stroke="currentColor"
+            stroke-width="0.9"
+            opacity="0.85"></circle>
+          <circle cx="148.5" cy="132.5" r="1.4" fill="var(--color-paper)" opacity="0.9"></circle>
+
+          {/* 短冊。朱の紙に、穴・糸・折れ線・縁の影 */}
+          <g class="fx__tanzaku">
+            <path d="M150 138v12" stroke="currentColor" stroke-width="0.9" opacity="0.45"></path>
+            <path d="M139 150h22l-1 70h-20z" fill="url(#fx-tanzaku)"></path>
+            <path
+              d="M139 150h22l-1 70h-20z"
+              stroke="var(--color-paper)"
+              stroke-width="0.8"
+              opacity="0.45"></path>
+            <path d="M160 152l-1 66" stroke="var(--color-ink)" stroke-width="0.8" opacity="0.18"
+            ></path>
+            <circle cx="150" cy="155.5" r="1.6" fill="var(--color-paper)" opacity="0.85"></circle>
+            <path d="M139.4 158h21.4" stroke="var(--color-paper)" stroke-width="0.7" opacity="0.4"
+            ></path>
+            <path
+              d="M150 166v46"
+              stroke="var(--color-paper)"
+              stroke-width="0.8"
+              stroke-dasharray="6 3"
+              opacity="0.35"></path>
+          </g>
         </g>
       </svg>
     </div>
@@ -178,15 +312,76 @@ const motes = Array.from({ length: COUNTS.mote }, () => ({
       {leaves.map((l) => <span class={`fx__bit fx__leaf ${l.cls}`} style={l.style} />)}
     </div>
 
-    {/* 画面下部の落ち葉 */}
+    {/* 右上の紅葉の枝 */}
+    <div class="fx__corner">
+      <svg viewBox="0 0 260 150" fill="none">
+        <path
+          d="M260 12c-30 6-58 20-82 40-18 15-32 33-52 44-16 9-34 13-52 13"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          opacity="0.55"></path>
+        <path
+          d="M214 40c-6 16-8 33-6 50M168 78c-14 6-29 9-44 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.45"></path>
+        {
+          autumnLeaves.map(([x, y, s, rot, tone]) => (
+            <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s / 100}) translate(-50 -46)`}>
+              <path d={MAPLE} fill={`var(--fx-leaf-${tone})`} opacity="0.9" />
+            </g>
+          ))
+        }
+      </svg>
+    </div>
+
+    {/* 左下のすすき。落ち葉の山から立ち上がり、穂がゆっくり揺れる */}
+    <div class="fx__corner fx__corner--bl">
+      <svg viewBox="0 0 220 260" fill="none">
+        {
+          stalks.map(([bx, tx, ty, dur, delay]) => (
+            <g
+              class="fx__stalk"
+              style={`animation-duration:${dur};animation-delay:${delay}`}
+            >
+              <path
+                d={`M${bx} 260C${bx + 6} 210 ${tx - 10} 150 ${tx} ${ty + 60}`}
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                opacity="0.5"
+              />
+              <g transform={`translate(${tx} ${ty + 60}) rotate(${(tx - bx) * 0.9})`}>
+                <path
+                  d="M0 0c9-16 11-40 0-64-11 24-9 48 0 64z"
+                  fill="var(--fx-plume)"
+                  opacity="0.85"
+                />
+                <path
+                  d="M0-8c6-8 7-22 3-38M0-14c-6-8-7-22-3-38M1-24c5-6 5-14 2-24M-1-28c-5-6-5-14-2-24"
+                  stroke="var(--color-paper)"
+                  stroke-width="0.9"
+                  stroke-linecap="round"
+                  opacity="0.6"
+                />
+              </g>
+            </g>
+          ))
+        }
+      </svg>
+    </div>
+
+    {/* 画面下部の落ち葉。画面幅いっぱいまで続く */}
     <div class="fx__ground">
       <svg viewBox="0 0 1200 90" preserveAspectRatio="none" fill="none">
         <path
-          d="M0 90V62c60-10 120 4 180-2s120-20 180-14 120 22 180 18 120-22 180-18 120 20 180 16 120-16 120-16v44z"
+          d="M0 62C60 52 140 70 200 64 260 58 340 44 400 56 460 68 540 78 600 66 660 54 740 46 800 58 860 70 940 76 1000 64 1060 52 1140 50 1200 60L1200 90 0 90Z"
           fill="var(--fx-leaf-b)"
           opacity="0.3"></path>
         <path
-          d="M0 90V72c70-8 140 6 210 0s140-16 210-10 140 18 210 14 140-16 210-12 160 12 160 12v14z"
+          d="M0 74C80 66 160 82 240 76 320 70 400 62 480 72 560 82 640 84 720 76 800 68 880 62 960 72 1040 82 1120 80 1200 74L1200 90 0 90Z"
           fill="var(--fx-leaf-a)"
           opacity="0.35"></path>
         {
@@ -200,11 +395,7 @@ const motes = Array.from({ length: COUNTS.mote }, () => ({
             [1110, 60, 15, 20],
           ].map(([x, y, s, rot], i) => (
             <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${Number(s) / 100})`}>
-              <path
-                d="M50 2l8 22 18-8-6 20h22L76 52l12 18-22-6-2 24-14-16-14 16-2-24-22 6 12-18L8 36h22l-6-20 18 8z"
-                fill={`var(--fx-leaf-${['a', 'b', 'c'][i % 3]})`}
-                opacity="0.8"
-              />
+              <path d={MAPLE} fill={`var(--fx-leaf-${['a', 'b', 'c'][i % 3]})`} opacity="0.8" />
             </g>
           ))
         }
@@ -215,6 +406,55 @@ const motes = Array.from({ length: COUNTS.mote }, () => ({
   {/* ---------------- 冬 ― 雪 ---------------- */}
   <div class="fx__season fx__season--winter">
     <div class="fx__field">{snow.map((s) => <span class="fx__bit fx__snow" style={s.style} />)}</div>
+
+    {/* 右上の雪をかぶった枝 */}
+    <div class="fx__corner">
+      <svg viewBox="0 0 260 150" fill="none">
+        {/* 葉のない枝 */}
+        <path
+          d="M260 14c-30 6-58 20-82 40-18 15-32 33-52 44-16 9-34 13-52 13"
+          stroke="currentColor"
+          stroke-width="3.2"
+          stroke-linecap="round"
+          opacity="0.6"></path>
+        <path
+          d="M214 42c-6 16-8 33-6 50M168 80c-14 6-29 9-44 9M232 30c-10-2-20-1-28 3"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.5"></path>
+        {/* 枝の上面に乗る雪。少し上にずらして、途切れさせながら描く */}
+        <path
+          d="M260 10c-30 6-58 20-82 40-18 15-32 33-52 44-16 9-34 13-52 13"
+          stroke="var(--fx-snow)"
+          stroke-width="6"
+          stroke-linecap="round"
+          stroke-dasharray="30 14 18 20 26 12"
+          opacity="0.95"></path>
+        <path
+          d="M214 38c-6 16-8 33-6 50M168 76c-14 6-29 9-44 9"
+          stroke="var(--fx-snow)"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-dasharray="12 10 16 12"
+          opacity="0.9"></path>
+        {[[229, 26], [199, 51], [147, 92], [96, 110]].map(([cx, cy]) => (
+          <circle cx={cx} cy={cy} r="2.2" fill="var(--fx-snow)" opacity="0.9" />
+        ))}
+      </svg>
+    </div>
+
+    {/* 窓の霜。左上と右下の角から、開いたときにゆっくり伸びる */}
+    <div class="fx__frost fx__frost--tl">
+      <svg viewBox="0 0 160 160" fill="none">
+        <path d={FROST} pathLength="1" stroke="var(--fx-snow)" stroke-width="1.3" stroke-linecap="round"></path>
+      </svg>
+    </div>
+    <div class="fx__frost fx__frost--br">
+      <svg viewBox="0 0 160 160" fill="none">
+        <path d={FROST} pathLength="1" stroke="var(--fx-snow)" stroke-width="1.3" stroke-linecap="round"></path>
+      </svg>
+    </div>
 
     {/* 画面下部の積雪 */}
     <div class="fx__ground">
