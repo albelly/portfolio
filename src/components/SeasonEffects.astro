@@ -120,6 +120,31 @@ const restingPetals: [number, number, number, number][] = Array.from({ length: 1
   pick(-80, 80),
 ]);
 
+/* 夏の葉の形。先の尖った楕円。原点が葉柄の付け根、先端が上 */
+const LEAF = 'M0 0C-9-8-12-22 0-40 12-22 9-8 0 0z';
+
+/* 夏の枝につける葉。[x, y, 回転, 大きさ, 色]
+   幹に沿って左右に対で付け、小枝の先は房にする。 */
+const summerLeaves: [number, number, number, number, 'a' | 'b'][] = [
+  [244, 14, -62, 0.95, 'a'],
+  [236, 20, 128, 0.8, 'b'],
+  [214, 30, -54, 1.0, 'b'],
+  [204, 38, 136, 0.85, 'a'],
+  [184, 50, -48, 0.9, 'a'],
+  [172, 62, 142, 0.8, 'b'],
+  [152, 80, -42, 1.0, 'b'],
+  [140, 92, 150, 0.85, 'a'],
+  [108, 104, -36, 0.9, 'a'],
+  [92, 108, 156, 0.8, 'b'],
+  [74, 110, -20, 0.75, 'a'],
+  /* 小枝の先の房 */
+  [208, 92, -100, 0.85, 'b'],
+  [206, 94, -40, 0.9, 'a'],
+  [210, 90, 20, 0.7, 'b'],
+  [124, 88, -120, 0.8, 'a'],
+  [122, 90, -60, 0.85, 'b'],
+];
+
 /* 紅葉の形。舞う葉・枝の葉・落ち葉で共通 */
 const MAPLE =
   'M50 2l8 22 18-8-6 20h22L76 52l12 18-22-6-2 24-14-16-14 16-2-24-22 6 12-18L8 36h22l-6-20 18 8z';
@@ -267,111 +292,39 @@ const stalks: [number, number, number, string, string][] = [
       {motes.map((m) => <span class="fx__mote" style={m.style} />)}
     </div>
 
-    {/* 右上の風鈴 */}
+    {/* 右上の夏の枝。他季節と同じ幹に、青々とした葉を茂らせる */}
     <div class="fx__corner">
-      <svg viewBox="0 0 200 260" fill="none">
-        <defs>
-          {/* 硝子の器。左上に光が当たり、奥が薄く透ける */}
-          <radialGradient id="fx-glass-body" cx="36%" cy="26%" r="78%">
-            <stop offset="0" style="stop-color: var(--color-paper); stop-opacity: 0.95"></stop>
-            <stop offset="0.42" style="stop-color: var(--fx-glass); stop-opacity: 0.55"></stop>
-            <stop offset="1" style="stop-color: var(--fx-glass); stop-opacity: 0.22"></stop>
-          </radialGradient>
-          <linearGradient id="fx-tanzaku" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" style="stop-color: var(--color-accent); stop-opacity: 0.78"></stop>
-            <stop offset="0.5" style="stop-color: var(--color-accent); stop-opacity: 0.95"></stop>
-            <stop offset="1" style="stop-color: var(--color-accent); stop-opacity: 0.7"></stop>
-          </linearGradient>
-        </defs>
-
-        <g class="fx__furin">
-          {/* 吊り紐 */}
-          <circle cx="150" cy="6" r="4" stroke="currentColor" stroke-width="1.6" opacity="0.5"
-          ></circle>
-          <path d="M150 10v36" stroke="currentColor" stroke-width="1.4" opacity="0.5"></path>
-
-          {/* 器の本体。釣鐘形で、口がわずかに開く */}
-          <path
-            d="M150 46c-24 0-42 18-42 46 0 16 6 28 12 36 2 3 5 5 9 5h42c4 0 7-2 9-5 6-8 12-20 12-36 0-28-18-46-42-46z"
-            fill="url(#fx-glass-body)"></path>
-          {/* 向こう側の壁。透けて見える */}
-          <path
-            d="M122 118c8 5 18 8 28 8s20-3 28-8"
-            stroke="var(--fx-glass)"
-            stroke-width="5"
-            stroke-linecap="round"
-            opacity="0.4"></path>
-          {/* 輪郭 */}
-          <path
-            d="M150 46c-24 0-42 18-42 46 0 16 6 28 12 36 2 3 5 5 9 5h42c4 0 7-2 9-5 6-8 12-20 12-36 0-28-18-46-42-46z"
-            stroke="currentColor"
-            stroke-width="1.4"
-            opacity="0.42"></path>
-          {/* 口 */}
-          <ellipse cx="150" cy="133" rx="31" ry="6" fill="var(--fx-glass)" opacity="0.3"
-          ></ellipse>
-          <ellipse
-            cx="150"
-            cy="133"
-            rx="31"
-            ry="6"
-            stroke="currentColor"
-            stroke-width="1.4"
-            opacity="0.5"></ellipse>
-          {/* 反射。強い光と弱い光 */}
-          <path
-            d="M124 96c0-16 8-30 20-38"
-            stroke="var(--color-paper)"
-            stroke-width="4.5"
-            stroke-linecap="round"
-            opacity="0.9"></path>
-          <path
-            d="M120 108c0 5 1 10 3 14"
-            stroke="var(--color-paper)"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            opacity="0.55"></path>
-          <path
-            d="M178 74c3 5 5 11 6 18"
-            stroke="var(--color-paper)"
-            stroke-width="2"
-            stroke-linecap="round"
-            opacity="0.45"></path>
-
-          {/* 舌（ぜつ）。硝子玉を糸で吊る */}
-          <path d="M150 88v42" stroke="currentColor" stroke-width="0.9" opacity="0.4"></path>
-          <circle
-            cx="150"
-            cy="134"
-            r="4.5"
-            fill="var(--fx-glass)"
-            stroke="currentColor"
-            stroke-width="0.9"
-            opacity="0.85"></circle>
-          <circle cx="148.5" cy="132.5" r="1.4" fill="var(--color-paper)" opacity="0.9"></circle>
-
-          {/* 短冊。朱の紙に、穴・糸・折れ線・縁の影 */}
-          <g class="fx__tanzaku">
-            <path d="M150 138v12" stroke="currentColor" stroke-width="0.9" opacity="0.45"></path>
-            <path d="M139 150h22l-1 70h-20z" fill="url(#fx-tanzaku)"></path>
-            <path
-              d="M139 150h22l-1 70h-20z"
-              stroke="var(--color-paper)"
-              stroke-width="0.8"
-              opacity="0.45"></path>
-            <path d="M160 152l-1 66" stroke="var(--color-ink)" stroke-width="0.8" opacity="0.18"
-            ></path>
-            <circle cx="150" cy="155.5" r="1.6" fill="var(--color-paper)" opacity="0.85"></circle>
-            <path d="M139.4 158h21.4" stroke="var(--color-paper)" stroke-width="0.7" opacity="0.4"
-            ></path>
-            <path
-              d="M150 166v46"
-              stroke="var(--color-paper)"
-              stroke-width="0.8"
-              stroke-dasharray="6 3"
-              opacity="0.35"></path>
-          </g>
-        </g>
+      <svg viewBox="0 0 260 150" fill="none">
+        <path
+          d="M260 12c-30 6-58 20-82 40-18 15-32 33-52 44-16 9-34 13-52 13"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          opacity="0.55"></path>
+        <path
+          d="M214 40c-6 16-8 33-6 50M168 78c-14 6-29 9-44 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity="0.45"></path>
+        {
+          summerLeaves.map(([x, y, rot, sc, tone]) => (
+            <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${sc})`}>
+              <path
+                d={LEAF}
+                fill={tone === 'a' ? 'var(--fx-leaf-summer)' : 'var(--fx-leaf-summer-light)'}
+                opacity="0.92"
+              />
+              <path
+                d="M0-4V-35"
+                stroke="var(--color-paper)"
+                stroke-width="1.1"
+                stroke-linecap="round"
+                opacity="0.45"
+              />
+            </g>
+          ))
+        }
       </svg>
     </div>
   </div>

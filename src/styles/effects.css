@@ -3,7 +3,7 @@
  *
  * 季節は色ではなく、自然のモチーフで表す。
  *   春 … 桜の花びらが舞う ＋ 右上に桜の枝 ＋ 左下に若草 ＋ 画面下部に花びらの吹き溜まり
- *   夏 … 左上から右下へ差し込む光芒と光の粒 ＋ 右上に風鈴
+ *   夏 … 左上から右下へ差し込む光芒と光の粒 ＋ 右上に夏の枝
  *   秋 … 紅葉が舞う ＋ 右上に紅葉の枝 ＋ 左下にすすき ＋ 画面下部に落ち葉
  *   冬 … 雪が降る ＋ 右上に雪をかぶった枝 ＋ 角に霜 ＋ 画面下部に積雪
  *
@@ -222,24 +222,11 @@
   will-change: transform;
 }
 
-/* 風鈴。全体がごくわずかに、短冊はもう少し大きく揺れる */
-.fx__furin {
-  transform-box: fill-box;
-  transform-origin: 50% 0;
-  animation: fx-sway-faint 6.5s ease-in-out infinite alternate;
-}
-
-.fx__tanzaku {
-  transform-box: fill-box;
-  transform-origin: 50% 0;
-  animation: fx-swing 4.2s ease-in-out -1.4s infinite alternate;
-}
-
 /* ------------------------------------------------------------------
  * 隅の演出
  * ------------------------------------------------------------------ */
 
-/* 右上（桜の枝・風鈴・紅葉の枝・雪の枝） */
+/* 右上（桜の枝・夏の枝・紅葉の枝・雪の枝）。四季とも同じ幹で、葉だけが変わる */
 .fx__corner {
   position: absolute;
   top: 0;
@@ -377,26 +364,6 @@
   }
   to {
     opacity: calc(var(--fx-o) * var(--fx-light-o) * 0.38);
-  }
-}
-
-/* 風鈴の短冊 */
-@keyframes fx-swing {
-  from {
-    transform: rotate(-6deg);
-  }
-  to {
-    transform: rotate(6deg);
-  }
-}
-
-/* 風鈴の器。ほとんど気づかない程度に */
-@keyframes fx-sway-faint {
-  from {
-    transform: rotate(-1.5deg);
-  }
-  to {
-    transform: rotate(1.5deg);
   }
 }
 

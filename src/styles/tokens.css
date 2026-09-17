@@ -182,9 +182,11 @@
   --fx-light-o: 1;
   --fx-ray: oklch(var(--fx-ray-l) 0.055 88);
   --fx-mote: oklch(var(--fx-l-pale) 0.09 88); /* 光の粒。小さいので少し濃くてよい */
-  --fx-glass: oklch(var(--fx-l-pale) 0.03 215); /* 風鈴の硝子 */
   --fx-plume: oklch(var(--fx-l-pale) 0.05 85); /* すすきの穂 */
   --fx-grass: oklch(var(--fx-l) 0.07 140); /* 春の若草 */
+  /* 夏の葉。若草と同じ系統で、彩度を上げ明度を少し下げた濃い緑と、光を受ける明るい緑 */
+  --fx-leaf-summer: oklch(calc(var(--fx-l) - 6%) 0.11 145);
+  --fx-leaf-summer-light: oklch(calc(var(--fx-l) + 6%) 0.09 140);
 
   /* テーマが切り替わったときに、色だけをなめらかに移す */
   --dur-theme: 420ms;
